@@ -2,7 +2,6 @@ service: task1
 
 frameworkVersion: '2'
 
-
 provider:
   name: aws
   runtime: nodejs12.x
@@ -11,31 +10,44 @@ provider:
   environment:
     TABLE_NAME:
       Ref: UsersTable # reference for functions
-  iamRoleStatements:
-  - Effect: Allow
-    Action:
-      - dynamodb:Query
-      - dynamodb:GetItem
-      - dynamodb:PutItem
-      - dynamodb:UpdateItem
-    Resource:
-      - "Fn::GetAtt": [UsersTable, Arn] # Fn::GetAtt: [ logicalNameOfResource, attributeName ] - this is for getting the Arn(Identifier) of the resource usersTable
-
-
+  # iamRoleStatements:
+  # - Effect: Allow
+  #   Action:
+  #     - dynamodb:Query
+  #     - dynamodb:GetItem
+  #     - dynamodb:PutItem
+  #     - dynamodb:UpdateItem
+  #   Resource:
+  #     - "Fn::GetAtt": [UsersTable, Arn] # Fn::GetAtt: [ logicalNameOfResource, attributeName ] - this is for getting the Arn(Identifier) of the resource usersTable
+   
 functions:
   hello:
     handler: handler.hello
   get:
     handler: handler.getItemFromDB
+    iamRoleStatementsName: getItemFromDBRole #optional custom role name setting instead of the default generated one
+    iamRoleStatements:
+      - Effect: "Allow"        
+        Action:
+          - dynamodb:GetItem        
+        Resource: 
+          - "Fn::GetAtt": [UsersTable, Arn] # Fn::GetAtt: [ logicalNameOfResource, attributeName ] - this is for getting the Arn(Identifier) of the resource usersTable
       #events:
       #- http:
           #path: Hier route eintragen
           #method: GET
   putOrPost: 
     handler: handler.writeToDB
+    iamRoleStatementsName: writeToDBRole #optional custom role name setting instead of the default generated one
+    iamRoleStatements:
+      - Effect: "Allow"        
+        Action:
+          - dynamodb:PutItem
+          - dynamodb:UpdateItem  
+          - dynamodb:GetItem    
+        Resource: 
+          - "Fn::GetAtt": [UsersTable, Arn] # Fn::GetAtt: [ logicalNameOfResource, attributeName ] - this is for getting the Arn(Identifier) of the resource usersTable
   
-
-
 resources: # CloudFormation template syntax from here on.
   Resources:
     UsersTable: #must be same as TableName
@@ -51,9 +63,9 @@ resources: # CloudFormation template syntax from here on.
             AttributeType: S   
         KeySchema:
           - AttributeName: ID
-            KeyType: HASH
+            KeyType: HASH   
           - AttributeName: Name
-            KeyType: RANGE    
+            KeyType: RANGE
         LocalSecondaryIndexes:
         - IndexName: by-Surname
           KeySchema: 
@@ -62,8 +74,19 @@ resources: # CloudFormation template syntax from here on.
           - AttributeName: Surname
             KeyType: RANGE  
           Projection: 
-            ProjectionType: ALL    
+            ProjectionType: ALL  
+        - IndexName: by-Name
+          KeySchema: 
+          - AttributeName: ID
+            KeyType: HASH
+          - AttributeName: Name
+            KeyType: RANGE  
+          Projection: 
+            ProjectionType: ALL  
+
         BillingMode: PAY_PER_REQUEST
        # ProvisionedThroughput:
         #  ReadCapacityUnits: 1
         #  WriteCapacityUnits: 1
+plugins:
+  - serverless-iam-roles-per-function

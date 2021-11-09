@@ -106,25 +106,79 @@ module.exports.writeToDB = async(event) => {
 
     // check if an iten can be found under given id
     // then we can put or post or restrict updates
-    let res = this.getItemFromDB();
+    let res = await this.getItemFromDB(event);
+
+    console.log(res.body.Item.ID);
+
+    let querriedID = res.body.Item.ID;
+    let querriedName = res.body.Item.Name;
+    let querriedSurname = res.body.Item.Surname;
+    let update;
+
+
+
+    if (querriedID === event.key1) {
+        // if id is the same put would update 
+        // we could put a 4 key for the user to decide if put/post
+        if (event.key4 === null || event.key4 === undefined || event.key4 === "update") {
+            // default
+            update = true;
+            if (!(querriedName === event.key2)) {
+                // with current config a new item will be created with same ID but diff Name
+                // here one can manually restrict that or better change the id
+
+                // querry for highest id and then append at ID+1:
+                var params = {
+                    TableName: TableName,
+                    KeyConditionExpression: 'ID = :ID',
+                    ExpressionAttributeValues: {
+                        ':ID': 0
+                    },
+                    ScanIndexForward: false
+                };
+
+                let query = await docClient.query(params, function(err, data) {
+                    if (err) {
+                        console.error("Unable to query. Error:", JSON.stringify(err, null, 2));
+                    } else {
+                        console.log("Query succeeded.");
+                    }
+                }).promise();
+
+                console.log(query);
+
+
+                const response = {
+                    statusCode: 400,
+                };
+                return response;
+            }
+
+        }
+        if (event.key4 === "new") {
+            update = false;
+        }
+
+
+    }
 
 
     var params = {
         TableName: TableName,
         Item: {
-            'ID': event.body.key1,
-            'Name': event.body.key2,
-            'Surname': event.body.Key3,
+            'ID': event.key1,
+            'Name': event.key2,
+            'Surname': event.key3,
         }
     };
 
-    docClient.put(params, function(err, data) {
+    let result = await docClient.put(params, function(err, data) {
         if (err) {
             console.log("Error", err);
         } else {
             console.log("Success", data);
         }
-    });
+    }).promise();
 
     return {
         statusCode: 200,
