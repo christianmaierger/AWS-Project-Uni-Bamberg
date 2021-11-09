@@ -8,11 +8,62 @@ provider:
   runtime: nodejs12.x
   lambdaHashingVersion: 20201221
   region: eu-central-1
+  environment:
+    TABLE_NAME:
+      Ref: UsersTable # reference for functions
+  iamRoleStatements:
+  - Effect: Allow
+    Action:
+      - dynamodb:Query
+      - dynamodb:GetItem
+      - dynamodb:PutItem
+      - dynamodb:UpdateItem
+    Resource:
+      - "Fn::GetAtt": [UsersTable, Arn] # Fn::GetAtt: [ logicalNameOfResource, attributeName ] - this is for getting the Arn(Identifier) of the resource usersTable
+
 
 functions:
   hello:
     handler: handler.hello
   get:
     handler: handler.getItemFromDB
+      #events:
+      #- http:
+          #path: Hier route eintragen
+          #method: GET
   putOrPost: 
     handler: handler.writeToDB
+  
+
+
+resources: # CloudFormation template syntax from here on.
+  Resources:
+    UsersTable: #must be same as TableName
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: UsersTable
+        AttributeDefinitions:
+          - AttributeName: ID
+            AttributeType: N # N = All number types, also int or double are ok for example
+          - AttributeName: Name
+            AttributeType: S # S for String
+          - AttributeName: Surname
+            AttributeType: S   
+        KeySchema:
+          - AttributeName: ID
+            KeyType: HASH
+          - AttributeName: Name
+            KeyType: RANGE    
+        LocalSecondaryIndexes:
+        - IndexName: by-Surname
+          KeySchema: 
+          - AttributeName: ID
+            KeyType: HASH
+          - AttributeName: Surname
+            KeyType: RANGE  
+          Projection: 
+            ProjectionType: ALL    
+        BillingMode: PAY_PER_REQUEST
+       # ProvisionedThroughput:
+        #  ReadCapacityUnits: 1
+        #  WriteCapacityUnits: 1
