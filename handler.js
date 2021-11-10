@@ -7,7 +7,13 @@ var docClient = new AWS.DynamoDB.DocumentClient({ apiVersion: '2012-08-10' });
 const TableName = process.env.TABLE_NAME
 
 
-module.exports.hello = async(event) => {
+module.exports.logItemChanges = async(event) => {
+
+
+    console.log("Trigger of LOGGER PULLED");
+
+
+
     return {
         statusCode: 200,
         body: JSON.stringify({
@@ -19,7 +25,6 @@ module.exports.hello = async(event) => {
         ),
     };
 };
-
 
 module.exports.getItemFromDB = async(event) => {
 
@@ -109,8 +114,35 @@ module.exports.writeToDB = async(event) => {
     let newID;
     // if id not already in db, just post the new item
     if (res.statusCode === 404) {
-        //  just put id from event in newId and post it later
+        //  just put id from event in newId and post direct
         newID = event.key1;
+        var params = {
+            TableName: TableName,
+            Item: {
+                'ID': newID,
+                'Name': event.key2,
+                'Surname': event.key3,
+            }
+        };
+        let result = await docClient.put(params, function(err, data) {
+            if (err) {
+                console.log("Error", err);
+            } else {
+                console.log("Success", data);
+            }
+        }).promise();
+        // TODO access data/result
+        return {
+            statusCode: 200,
+            body: JSON.stringify({
+                    message: 'Go Serverless v2.0! Your function executed successfully!',
+                    input: event,
+                    output: result
+                },
+                null,
+                2
+            ),
+        };
     }
 
     let querriedID = res.body.Item.ID;

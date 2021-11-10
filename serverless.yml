@@ -21,8 +21,23 @@ provider:
   #     - "Fn::GetAtt": [UsersTable, Arn] # Fn::GetAtt: [ logicalNameOfResource, attributeName ] - this is for getting the Arn(Identifier) of the resource usersTable
    
 functions:
-  hello:
-    handler: handler.hello
+  logItemChanges:
+    handler: handler.logItemChanges
+    events:
+      - stream:
+          type: dynamodb
+          arn:
+            Fn::GetAtt: [UsersTable, StreamArn]
+    iamRoleStatementsName: logItemChangesRole #optional custom role name setting instead of the default generated one
+    iamRoleStatements:
+      - Effect: "Allow"        
+        Action:
+        - dynamodb:DescribeStream
+        - dynamodb:GetRecords
+        - dynamodb:GetShardIterator
+        - dynamodb:ListStreams       
+        Resource: 
+          - "Fn::GetAtt": [UsersTable, Arn] # Fn::GetAtt: [ logicalNameOfResource, attributeName ] - this is for getting the Arn(Identifier) of the resource usersTable
   get:
     handler: handler.getItemFromDB
     iamRoleStatementsName: getItemFromDBRole #optional custom role name setting instead of the default generated one
@@ -83,7 +98,8 @@ resources: # CloudFormation template syntax from here on.
         #     KeyType: RANGE  
         #   Projection: 
         #     ProjectionType: ALL  
-
+        StreamSpecification:
+           StreamViewType: NEW_AND_OLD_IMAGES
         BillingMode: PAY_PER_REQUEST
        # ProvisionedThroughput:
         #  ReadCapacityUnits: 1
