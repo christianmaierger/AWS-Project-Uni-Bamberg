@@ -52,8 +52,7 @@ module.exports.getItemFromDB = async(event) => {
     var params = {
         TableName: TableName,
         Key: {
-            'ID': integerID,
-            'Name': event.key2
+            'ID': integerID
         }
     };
 
@@ -107,32 +106,44 @@ module.exports.writeToDB = async(event) => {
     // check if an iten can be found under given id
     // then we can put or post or restrict updates
     let res = await this.getItemFromDB(event);
-
-    console.log(res.body.Item.ID);
+    let newID;
+    // if id not already in db, just post the new item
+    if (res.statusCode === 404) {
+        //  just put id from event in newId and post it later
+        newID = event.key1;
+    }
 
     let querriedID = res.body.Item.ID;
     let querriedName = res.body.Item.Name;
     let querriedSurname = res.body.Item.Surname;
     let update;
 
-
-
+    // check could be omitted if 404 not returned item was found and ids are equal
     if (querriedID === event.key1) {
         // if id is the same put would update 
         // we could put a 4 key for the user to decide if put/post
         if (event.key4 === null || event.key4 === undefined || event.key4 === "update") {
             // default
             update = true;
-            if (!(querriedName === event.key2)) {
-                // with current config a new item will be created with same ID but diff Name
-                // here one can manually restrict that or better change the id
+            console.log("no 4 key");
+            newID = event.key1;
+        }
 
-                // querry for highest id and then append at ID+1:
+        if (event.key4 === "new") {
+            console.log(" 4 key = new");
+            update = false;
+            let idTaken = true;
+            let freeID;
+
+            let i = querriedID;
+            // querry for next possible free id:
+            while (idTaken === true) {
+                console.log("At start of llo i is: " + i)
                 var params = {
                     TableName: TableName,
                     KeyConditionExpression: 'ID = :ID',
                     ExpressionAttributeValues: {
-                        ':ID': 0
+                        ':ID': i, // look from the wanted ID onward and increment
                     },
                     ScanIndexForward: false
                 };
@@ -141,37 +152,33 @@ module.exports.writeToDB = async(event) => {
                     if (err) {
                         console.error("Unable to query. Error:", JSON.stringify(err, null, 2));
                     } else {
-                        console.log("Query succeeded.");
+                        console.log("Query succeeded." + data);
+                        return data;
                     }
                 }).promise();
 
-                console.log(query);
-
-
-                const response = {
-                    statusCode: 400,
-                };
-                return response;
+                console.log("Result of query Count is: " + query.Count);
+                console.log("Result of query ScannedCount is: " + query.ScannedCount);
+                console.log("Result of query Items is: " + query.Items);
+                console.log(idTaken);
+                if (query.Count === 0) {
+                    idTaken = false;
+                    newID = i;
+                }
+                i = i + 1;
+                console.log("At end i is: " + i)
             }
-
         }
-        if (event.key4 === "new") {
-            update = false;
-        }
-
-
     }
-
-
+    // ready the params with the correct ID
     var params = {
         TableName: TableName,
         Item: {
-            'ID': event.key1,
+            'ID': newID,
             'Name': event.key2,
             'Surname': event.key3,
         }
     };
-
     let result = await docClient.put(params, function(err, data) {
         if (err) {
             console.log("Error", err);
@@ -179,12 +186,13 @@ module.exports.writeToDB = async(event) => {
             console.log("Success", data);
         }
     }).promise();
-
+    // TODO access data/result
     return {
         statusCode: 200,
         body: JSON.stringify({
                 message: 'Go Serverless v2.0! Your function executed successfully!',
                 input: event,
+                output: result
             },
             null,
             2

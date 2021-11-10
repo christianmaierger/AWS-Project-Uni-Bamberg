@@ -43,8 +43,8 @@ functions:
       - Effect: "Allow"        
         Action:
           - dynamodb:PutItem
-          - dynamodb:UpdateItem  
-          - dynamodb:GetItem    
+          - dynamodb:GetItem  
+          - dynamodb:Query  
         Resource: 
           - "Fn::GetAtt": [UsersTable, Arn] # Fn::GetAtt: [ logicalNameOfResource, attributeName ] - this is for getting the Arn(Identifier) of the resource usersTable
   
@@ -57,32 +57,32 @@ resources: # CloudFormation template syntax from here on.
         AttributeDefinitions:
           - AttributeName: ID
             AttributeType: N # N = All number types, also int or double are ok for example
-          - AttributeName: Name
-            AttributeType: S # S for String
-          - AttributeName: Surname
-            AttributeType: S   
+          # - AttributeName: Name
+          #   AttributeType: S # S for String
+          # - AttributeName: Surname
+          #   AttributeType: S   
         KeySchema:
           - AttributeName: ID
             KeyType: HASH   
-          - AttributeName: Name
-            KeyType: RANGE
-        LocalSecondaryIndexes:
-        - IndexName: by-Surname
-          KeySchema: 
-          - AttributeName: ID
-            KeyType: HASH
-          - AttributeName: Surname
-            KeyType: RANGE  
-          Projection: 
-            ProjectionType: ALL  
-        - IndexName: by-Name
-          KeySchema: 
-          - AttributeName: ID
-            KeyType: HASH
-          - AttributeName: Name
-            KeyType: RANGE  
-          Projection: 
-            ProjectionType: ALL  
+          # - AttributeName: Name
+          #   KeyType: RANGE
+        # LocalSecondaryIndexes:
+        # - IndexName: by-Surname
+        #   KeySchema: 
+        #   - AttributeName: ID
+        #     KeyType: HASH
+        #   - AttributeName: Surname
+        #     KeyType: RANGE  
+        #   Projection: 
+        #     ProjectionType: ALL  
+        # - IndexName: by-Name
+        #   KeySchema: 
+        #   - AttributeName: ID
+        #     KeyType: HASH
+        #   - AttributeName: Name
+        #     KeyType: RANGE  
+        #   Projection: 
+        #     ProjectionType: ALL  
 
         BillingMode: PAY_PER_REQUEST
        # ProvisionedThroughput:
