@@ -1,18 +1,16 @@
 'use strict';
 // Load the AWS SDK for Node.js
-var AWS = require('aws-sdk');
+let AWS = require('aws-sdk');
 // Create DynamoDB document client
-var docClient = new AWS.DynamoDB.DocumentClient({ apiVersion: '2012-08-10' });
+let docClient = new AWS.DynamoDB.DocumentClient({ apiVersion: '2012-08-10' });
 // get our reference to table from environment variables
 const TableName = process.env.TABLE_NAME
 
 
 module.exports.logItemChanges = async(event) => {
 
-
     console.log("Trigger of LOGGER PULLED");
-
-
+    console.log(event);
 
     return {
         statusCode: 200,
@@ -31,26 +29,25 @@ module.exports.getItemFromDB = async(event) => {
     let anyTypeID;
     let typeOfID;
     let integerID;
-    if (!event || event.key1 === undefined || event.key1 === null || isNaN(event.key1) || isNaN(parseFloat(event.key1))) {
-        const response = {
+    // also here better not test for !event.key1 as this is true if 0
+    if (!event || isNaN(event.key1) || isNaN(parseFloat(event.key1))) {
+        return {
             statusCode: 400,
         };
-        return response;
     }
     typeOfID = typeof event.key1;
     anyTypeID = event.key1;
 
-    if (typeof event.key1 === "number") {
+    if (typeOfID === "number") {
         integerID = anyTypeID;
     }
     if ((typeOfID === 'string')) {
         if (!isNaN(anyTypeID) && !isNaN(parseFloat(anyTypeID))) {
             integerID = parseInt(anyTypeID, 10)
         } else {
-            const response = {
+            return {
                 statusCode: 400,
             };
-            return response;
         }
     }
 
@@ -65,61 +62,80 @@ module.exports.getItemFromDB = async(event) => {
         // this means err probobly on "server" occured, no error if not found!!!
         if (err) {
             console.log("Error", err);
-            const response = {
+            return {
                 statusCode: 500,
                 body: err,
             };
-            return response;
         } else {
             // if item was found it is in data.Item, otherwise data.Item is empty
             if (data.Item) {
-                console.log("data should have a value: " + data.Item);
                 return data;
             } else {
-                console.log("data should be empty " + data);
                 // this happes if ressource was not found on DB
                 return null;
             }
         }
     }).promise();
 
-    let i = 0;
-    for (let attr in result.Item) {
-        console.log("Attr" + i++ + "= " + attr);
-    }
-    console.log("Result is " + result);
-    console.log("Result.Item is " + result.Item);
 
     if (result.Item === undefined) {
-        const response = {
+        return {
             statusCode: 404,
         };
-        return response;
     }
 
     const response = {
         statusCode: 200,
         body: result,
     };
-    console.log("This is the response body " + response.body);
     return response;
 };
 
 
 module.exports.writeToDB = async(event) => {
 
+
+    let anyTypeID;
+    let typeOfID;
+    let integerID;
+
+    // better not test for !event.key1 as this returns also true if 0!!!!
+    if (!event ||  isNaN(event.key1) || isNaN(parseFloat(event.key1)) || !event.key2 || !event.key3 ) {
+        return {
+            statusCode: 400,
+        };
+    }
+    // TODO should wrong inputs for key2 and 3 be parsed/defaultet or just 400?
+
+
+    typeOfID = typeof event.key1;
+    anyTypeID = event.key1;
+
+    if (typeOfID === "number") {
+        integerID = anyTypeID;
+    }
+    if ((typeOfID === 'string')) {
+        if (!isNaN(anyTypeID) && !isNaN(parseFloat(anyTypeID))) {
+            integerID = parseInt(anyTypeID, 10)
+        } else {
+            return {
+                statusCode: 400,
+            };
+        }
+    }
+
     // check if an iten can be found under given id
     // then we can put or post or restrict updates
     let res = await this.getItemFromDB(event);
-    let newID;
+
     // if id not already in db, just post the new item
     if (res.statusCode === 404) {
-        //  just put id from event in newId and post direct
-        newID = event.key1;
+        //  just put id from event in integerID and post direct
+        integerID = event.key1;
         var params = {
             TableName: TableName,
             Item: {
-                'ID': newID,
+                'ID': integerID,
                 'Name': event.key2,
                 'Surname': event.key3,
             }
@@ -148,29 +164,22 @@ module.exports.writeToDB = async(event) => {
     let querriedID = res.body.Item.ID;
     let querriedName = res.body.Item.Name;
     let querriedSurname = res.body.Item.Surname;
-    let update;
 
     // check could be omitted if 404 not returned item was found and ids are equal
     if (querriedID === event.key1) {
-        // if id is the same put would update 
+        // if id is the same put would update
         // we could put a 4 key for the user to decide if put/post
         if (event.key4 === null || event.key4 === undefined || event.key4 === "update") {
             // default
-            update = true;
-            console.log("no 4 key");
-            newID = event.key1;
+            integerID = event.key1;
         }
 
         if (event.key4 === "new") {
-            console.log(" 4 key = new");
-            update = false;
             let idTaken = true;
-            let freeID;
 
             let i = querriedID;
             // querry for next possible free id:
             while (idTaken === true) {
-                console.log("At start of llo i is: " + i)
                 var params = {
                     TableName: TableName,
                     KeyConditionExpression: 'ID = :ID',
@@ -189,13 +198,9 @@ module.exports.writeToDB = async(event) => {
                     }
                 }).promise();
 
-                console.log("Result of query Count is: " + query.Count);
-                console.log("Result of query ScannedCount is: " + query.ScannedCount);
-                console.log("Result of query Items is: " + query.Items);
-                console.log(idTaken);
                 if (query.Count === 0) {
                     idTaken = false;
-                    newID = i;
+                    integerID = i;
                 }
                 i = i + 1;
                 console.log("At end i is: " + i)
@@ -206,7 +211,7 @@ module.exports.writeToDB = async(event) => {
     var params = {
         TableName: TableName,
         Item: {
-            'ID': newID,
+            'ID': integerID,
             'Name': event.key2,
             'Surname': event.key3,
         }
@@ -218,7 +223,7 @@ module.exports.writeToDB = async(event) => {
             console.log("Success", data);
         }
     }).promise();
-    // TODO access data/result
+    // TODO access data/result and/or send actual ID!!!
     return {
         statusCode: 200,
         body: JSON.stringify({
