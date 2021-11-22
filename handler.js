@@ -15,7 +15,7 @@ module.exports.logItemChanges = async(event) => {
     return {
         statusCode: 200,
         body: JSON.stringify({
-                message: 'Go Serverless v2.0! Your function executed successfully!',
+                message: 'Trigger was pulled, DB Item changed!',
                 input: event,
             },
             null,
@@ -130,8 +130,8 @@ module.exports.writeToDB = async(event) => {
 
     // if id not already in db, just post the new item
     if (res.statusCode === 404) {
+        console.log("Item was not found in DB")
         //  just put id from event in integerID and post direct
-        integerID = event.key1;
         var params = {
             TableName: TableName,
             Item: {
@@ -151,7 +151,7 @@ module.exports.writeToDB = async(event) => {
         return {
             statusCode: 200,
             body: JSON.stringify({
-                    message: 'Go Serverless v2.0! Your function executed successfully!',
+                    message: 'User was not already in DB with given ID! User was posted',
                     input: event,
                     output: result
                 },
@@ -160,23 +160,27 @@ module.exports.writeToDB = async(event) => {
             ),
         };
     }
+    console.log("Item was found in DB")
 
     let querriedID = res.body.Item.ID;
     let querriedName = res.body.Item.Name;
     let querriedSurname = res.body.Item.Surname;
 
+    console.log("querriedID is " + querriedID + " and typed in id is " + event.key1)
+
     // check could be omitted if 404 not returned item was found and ids are equal
     if (querriedID === event.key1) {
         // if id is the same put would update
-        // we could put a 4 key for the user to decide if put/post
+        // we could put a 4 key for the user to decide if put/post - keywords are update/new
         if (event.key4 === null || event.key4 === undefined || event.key4 === "update") {
             // default
+            console.log("Item will be updated")
             integerID = event.key1;
         }
 
         if (event.key4 === "new") {
             let idTaken = true;
-
+            console.log("Item will be put with new ID")
             let i = querriedID;
             // querry for next possible free id:
             while (idTaken === true) {
@@ -227,7 +231,7 @@ module.exports.writeToDB = async(event) => {
     return {
         statusCode: 200,
         body: JSON.stringify({
-                message: 'Go Serverless v2.0! Your function executed successfully!',
+                message: 'Your function executed successfully! User was posted with new id ' + integerID,
                 input: event,
                 output: result
             },
