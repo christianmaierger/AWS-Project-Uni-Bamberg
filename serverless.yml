@@ -9,17 +9,10 @@ provider:
   region: eu-central-1
   environment:
     TABLE_NAME:
-      Ref: UsersTable # reference for functions
-  # iamRoleStatements:
-  # - Effect: Allow
-  #   Action:
-  #     - dynamodb:Query
-  #     - dynamodb:GetItem
-  #     - dynamodb:PutItem
-  #     - dynamodb:UpdateItem
-  #   Resource:
-  #     - "Fn::GetAtt": [UsersTable, Arn] # Fn::GetAtt: [ logicalNameOfResource, attributeName ] - this is for getting the Arn(Identifier) of the resource usersTable
-   
+      Ref: UsersTable2 # reference for functions
+    #Get_Function:
+     # Ref: GetUserLambdaFunction
+
 functions:
   logItemChanges:
     handler: handler.logItemChanges
@@ -27,7 +20,7 @@ functions:
       - stream:
           type: dynamodb
           arn:
-            Fn::GetAtt: [UsersTable, StreamArn]
+            Fn::GetAtt: [UsersTable2, StreamArn]
     iamRoleStatementsName: logItemChangesRole #optional custom role name setting instead of the default generated one
     iamRoleStatements:
       - Effect: "Allow"        
@@ -37,16 +30,17 @@ functions:
         - dynamodb:GetShardIterator
         - dynamodb:ListStreams       
         Resource: 
-          - "Fn::GetAtt": [UsersTable, Arn] # Fn::GetAtt: [ logicalNameOfResource, attributeName ] - this is for getting the Arn(Identifier) of the resource usersTable
-  get:
+          - "Fn::GetAtt": [UsersTable2, Arn] # Fn::GetAtt: [ logicalNameOfResource, attributeName ] - this is for getting the Arn(Identifier) of the resource usersTable
+  getUser:
     handler: handler.getItemFromDB
+    name: getUser
     iamRoleStatementsName: getItemFromDBRole #optional custom role name setting instead of the default generated one
     iamRoleStatements:
       - Effect: "Allow"        
         Action:
-          - dynamodb:GetItem        
+          - dynamodb:GetItem
         Resource: 
-          - "Fn::GetAtt": [UsersTable, Arn] # Fn::GetAtt: [ logicalNameOfResource, attributeName ] - this is for getting the Arn(Identifier) of the resource usersTable
+          - "Fn::GetAtt": [UsersTable2, Arn] # Fn::GetAtt: [ logicalNameOfResource, attributeName ] - this is for getting the Arn(Identifier) of the resource usersTable
       #events:
       #- http:
           #path: Hier route eintragen
@@ -59,16 +53,24 @@ functions:
         Action:
           - dynamodb:PutItem
           - dynamodb:GetItem  
-          - dynamodb:Query  
-        Resource: 
-          - "Fn::GetAtt": [UsersTable, Arn] # Fn::GetAtt: [ logicalNameOfResource, attributeName ] - this is for getting the Arn(Identifier) of the resource usersTable
+          - dynamodb:Query
+        Resource:
+          - "Fn::GetAtt": [ UsersTable2, Arn ] # Fn::GetAtt: [ logicalNameOfResource, attributeName ] - this is for getting the Arn(Identifier) of the resource usersTable
+      - Effect: "Allow"
+        Action:
+          - lambda:InvokeFunction
+        Resource:
+        #  - "*"
+        #  - "Fn::GetAtt": [ GetUserLambdaFunction , Arn ]
+           - !GetAtt GetUserLambdaFunction.Arn
+
   
 resources: # CloudFormation template syntax from here on.
   Resources:
-    UsersTable: #must be same as TableName
+    UsersTable2: #must be same as TableName
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: UsersTable
+        TableName: UsersTable2
         AttributeDefinitions:
           - AttributeName: ID
             AttributeType: N # N = All number types, also int or double are ok for example
