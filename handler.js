@@ -24,6 +24,12 @@ function wrapResponse(statusCode, data) {
   }
 }
 
+function wrapParams(key, data, tableName = process.env.TABLE_NAME) {
+  let params = {TableName: tableName};
+  params[key] = data;
+  return params;
+}
+
 function isEmpty(obj) {
   return Object.keys(obj).length === 0;
 }
@@ -39,10 +45,12 @@ module.exports.echo = async (event) => {
 //TODO Would it make sense to not have to adjust the adjust the data in event to "N" "S" etc before sending it to this function
 module.exports.put = async (event) => {
 
-  var params = {
-    TableName: process.env.TABLE_NAME,
-    Item: event
-  }
+  // var params = {
+  //   TableName: process.env.TABLE_NAME,
+  //   Item: event
+  // }
+
+  var params = wrapParams("Item", event);
 
   //TODO Query after item with given id, throw error if it exists -> race condition! (normal in dbs?)
   try {
@@ -58,10 +66,12 @@ module.exports.change = async (event) => {
 }
 
 module.exports.get = async (event) => {
-  var params = {
-    TableName: process.env.TABLE_NAME,
-    Key: event
-  }
+  // var params = {
+  //   TableName: process.env.TABLE_NAME,
+  //   Key: event
+  // }
+
+  var params = wrapParams("Key", event);
   
   try {
     let response = await docClient.get(params).promise();
