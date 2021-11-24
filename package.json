@@ -4,5 +4,9 @@
   },
   "devDependencies": {
     "serverless-iam-roles-per-function": "^3.2.0"
+  },
+  "scripts": {
+    "get": "serverless invoke local -f get -p ./data/get.json",
+    "put": "serverless invoke local -f put -p ./data/put.json"
   }
 }
