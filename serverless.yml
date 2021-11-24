@@ -9,6 +9,7 @@ provider:
   region: eu-central-1
   environment:
     TABLE_NAME: ${file(./env.yml):tableName, "NoEnvFileName"}
+    FUNC_GET: max-dev-get
 
 
 package:
@@ -33,11 +34,21 @@ functions:
         Action:
           - dynamodb:PutItem        
         Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TABLE_NAME}"
+      - Effect: "Allow"
+        Action:
+          - lambda:invokeFunction
+        Resource: "arn:aws:dynamodb:${self:provider.region}:*:function:${self:service}-${sls:stage}-get"
 
   change:
     handler: handler.change
   get:
     handler: handler.get
+    iamRoleStatements:
+      - Effect: "Allow"        
+        Action:
+          - dynamodb:GetItem        
+        Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TABLE_NAME}"
+
   remove:
     handler: handler.remove
   putAll:

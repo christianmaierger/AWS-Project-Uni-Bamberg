@@ -45,11 +45,6 @@ module.exports.echo = async (event) => {
 //TODO Would it make sense to not have to adjust the adjust the data in event to "N" "S" etc before sending it to this function
 module.exports.put = async (event) => {
 
-  // var params = {
-  //   TableName: process.env.TABLE_NAME,
-  //   Item: event
-  // }
-
   var params = wrapParams("Item", event);
 
   //Check if item already exists in db since the .put fx will not report an error even if an element with the 
@@ -58,14 +53,16 @@ module.exports.put = async (event) => {
   try{
     var lambda = new AWS.Lambda();
     var response = await lambda.invoke({
-      FunctionName: "max-dev-get",
+      FunctionName: process.env.FUNC_GET,
       Payload: JSON.stringify({user_id: event.user_id},null,2)
     }).promise();
-    console.log("Resp---------------------------",response);
+    let payload = JSON.parse(response.Payload);
+    if(payload.statusCode == 200) {
+      return wrapResponse(400, { message: "Entry with given ID already exists"});
+    }
   } catch (error) {
-    console.log("Err-------------------", error);
+    return wrapResponse(400, { message: "There was a Problem checking the Database"});
   }
-  console.log("other --------------------------------------");
 
   try {
     await docClient.put(params).promise();
@@ -80,10 +77,6 @@ module.exports.change = async (event) => {
 }
 
 module.exports.get = async (event) => {
-  // var params = {
-  //   TableName: process.env.TABLE_NAME,
-  //   Key: event
-  // }
 
   var params = wrapParams("Key", event);
   
