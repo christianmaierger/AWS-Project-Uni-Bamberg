@@ -9,7 +9,7 @@ var lambda = new AWS.Lambda({
 });
 // get our reference to table from environment variables
 const TableName = process.env.TABLE_NAME
-//const GetFunction = process.env.Get_Function
+const GetFunction = process.env.Get_Function
 
 
 module.exports.logItemChanges = async(event) => {
@@ -110,7 +110,7 @@ module.exports.writeToDB = async(event) => {
     // then we can put or post or restrict updates
     // todo hardcoded function name
     let res = await lambda.invoke({
-        FunctionName: "getUser",
+        FunctionName: GetFunction,
         InvocationType: 'RequestResponse',
         Payload: JSON.stringify(event, null, 2) // pass params
     }, function(error, data) {

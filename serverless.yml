@@ -10,8 +10,7 @@ provider:
   environment:
     TABLE_NAME:
       Ref: UsersTable2 # reference for functions
-    #Get_Function:
-     # Ref: GetUserLambdaFunction
+    Get_Function: "getUser"
 
 functions:
   logItemChanges:
