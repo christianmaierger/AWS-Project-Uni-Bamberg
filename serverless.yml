@@ -8,8 +8,9 @@ provider:
   lambdaHashingVersion: 20201221
   region: eu-central-1
   environment:
-    TABLE_NAME:
-      Ref: UsersTable2 # reference for functions
+    Table_Name: ${file(./env.yml):Table_Name}
+    Partition_Key: ${file(./env.yml):Partition_Key}
+    Sort_Key: ${file(./env.yml):Sort_Key}
     Get_Function: "getUser"
 
 functions:
@@ -45,7 +46,7 @@ functions:
           #path: Hier route eintragen
           #method: GET
   putOrPost: 
-    handler: handler.writeToDB
+    handler: handler.create
     iamRoleStatementsName: writeToDBRole #optional custom role name setting instead of the default generated one
     iamRoleStatements:
       - Effect: "Allow"        
@@ -71,17 +72,17 @@ resources: # CloudFormation template syntax from here on.
       Properties:
         TableName: UsersTable2
         AttributeDefinitions:
-          - AttributeName: ID
-            AttributeType: N # N = All number types, also int or double are ok for example
-          # - AttributeName: Name
-          #   AttributeType: S # S for String
+          - AttributeName: email
+            AttributeType: S # S = String
+           - AttributeName: Name
+            AttributeType: S # S for String
           # - AttributeName: Surname
           #   AttributeType: S   
         KeySchema:
-          - AttributeName: ID
+          - AttributeName: email
             KeyType: HASH   
-          # - AttributeName: Name
-          #   KeyType: RANGE
+           - AttributeName: Name
+             KeyType: RANGE
         # LocalSecondaryIndexes:
         # - IndexName: by-Surname
         #   KeySchema: 
