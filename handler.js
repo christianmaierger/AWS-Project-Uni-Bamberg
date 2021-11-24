@@ -52,7 +52,21 @@ module.exports.put = async (event) => {
 
   var params = wrapParams("Item", event);
 
-  //TODO Query after item with given id, throw error if it exists -> race condition! (normal in dbs?)
+  //Check if item already exists in db since the .put fx will not report an error even if an element with the 
+  //same id already exists
+
+  try{
+    var lambda = new AWS.Lambda();
+    var response = await lambda.invoke({
+      FunctionName: "max-dev-get",
+      Payload: JSON.stringify({user_id: event.user_id},null,2)
+    }).promise();
+    console.log("Resp---------------------------",response);
+  } catch (error) {
+    console.log("Err-------------------", error);
+  }
+  console.log("other --------------------------------------");
+
   try {
     await docClient.put(params).promise();
     return wrapResponse(200, { message:"Creation of entry successful"});
