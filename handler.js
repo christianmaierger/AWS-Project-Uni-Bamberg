@@ -8,7 +8,7 @@ const lambda = new AWS.Lambda({
     region: 'eu-central-1' //change to your region
 });
 // get our reference to table from environment variables
-const TableName = process.env.TABLE_NAME;
+const TableName = process.env.Table_Name;
 const GetFunction = process.env.Get_Function;
 
 
