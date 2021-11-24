@@ -1,19 +1,64 @@
-service: max-dev
+service: max
 
 frameworkVersion: '2 || 3'
-
 
 provider:
   name: aws
   runtime: nodejs12.x
   lambdaHashingVersion: 20201221
+  region: eu-central-1
+  environment:
+    TABLE_NAME: ${file(./env.yml):tableName, "NoEnvFileName"}
+
 
 package:
   exclude:
     - node_modules/**
     - package.json
     - package-lock.json
+    - env.yml
+    - "*.json"
 
 functions:
   hello:
     handler: handler.hello
+  echo:
+    handler: handler.echo
+  put:
+    handler: handler.put
+    # Get Default name
+    # iamRoleStatementsName: max-db-put
+    iamRoleStatements:
+      - Effect: "Allow"        
+        Action:
+          - dynamodb:PutItem        
+        Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TABLE_NAME}"
+
+  change:
+    handler: handler.change
+  get:
+    handler: handler.get
+  remove:
+    handler: handler.remove
+  putAll:
+    handler: handler.putAll
+    # ... more fncs to CRUD multiple entries
+
+plugins:
+  - serverless-iam-roles-per-function
+
+resources: 
+  Resources:
+    maxdevtable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.TABLE_NAME}
+        AttributeDefinitions:
+          - 
+            AttributeName: user_id
+            AttributeType: "N"
+        KeySchema:
+          - 
+            AttributeName: user_id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
