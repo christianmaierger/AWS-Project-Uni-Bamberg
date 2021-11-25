@@ -1,15 +1,14 @@
 {
     "dependencies": {
-      "aws-sdk": "^2.1034.0"
+        "aws-sdk": "^2.1034.0"
     },
     "devDependencies": {
-      "serverless-iam-roles-per-function": "^3.2.0"
+        "serverless-iam-roles-per-function": "^3.2.0"
     },
     "scripts": {
-      "create": "serverless invoke local -f create -p ./data/create.json",
-      "read": "serverless invoke local -f read -p ./data/read.json",
-      "update": "serverless invoke local -f update -p ./data/update.json",
-      "delete": "serverless invoke local -f delete -p ./data/delete.json"
+        "create": "serverless invoke local -f create -p ./data/create.json",
+        "read": "serverless invoke local -f read -p ./data/read.json",
+        "update": "serverless invoke local -f update -p ./data/update.json",
+        "delete": "serverless invoke local -f delete -p ./data/delete.json"
     }
-  }
-  
+}
