@@ -10,38 +10,77 @@ const {
     lambda,
 } = require("../shared");
 
-module.exports.create = async (event) => {
-    if (!validateEmail(event.email)) {
-        return wrapResponse(400, {
-            message: "Bad Request: Not a valid email-adress",
-        });
-    }
+async function isAlreadyExisting(email, name, surname) {
+    const item = { email, name, surname };
+
     try {
         const response = await lambda
             .invoke({
                 FunctionName: GetFunction,
                 InvocationType: "RequestResponse", // is default
-                Payload: JSON.stringify(event, null, 2), // pass params
+                Payload: JSON.stringify(item, null, 2), // pass params
             })
             .promise();
         const payload = JSON.parse(response.Payload);
         if (payload.statusCode === 200) {
-            return wrapResponse(405, {
-                message:
-                    "Entry with given ID already exists, please use update to overide an existing entry",
-            });
+            return true;
         }
     } catch (error) {
-        return wrapResponse(400, {
-            message: "There was a Problem checking the Database",
-        });
+        throw "dberror";
     }
+}
 
-    const params = wrapParams("Item", event);
+async function putItemToDatabase(email, name, surname) {
+    const item = { email, name, surname };
+
+    const params = wrapParams("Item", item);
+
     try {
         await docClient.put(params).promise();
         return wrapResponse(200, { message: "Creation of entry successful" });
     } catch (error) {
         return wrapResponse(error.statusCode, { message: error.message });
+    }
+}
+
+async function createItem(email, name, surname) {
+    if (!validateEmail(email)) {
+        throw "badmail";
+    }
+
+    if (await isAlreadyExisting(email, name, surname)) {
+        throw "idexists";
+    }
+
+    return await putItemToDatabase(email, name, surname);
+}
+
+function handleError(err) {
+    switch (err) {
+        case "badmail":
+            return wrapResponse(400, {
+                message: "Bad Request: Not a valid email-adress",
+            });
+        case "idexists":
+            return wrapResponse(405, {
+                message:
+                    "Entry with given ID already exists, please use update to overide an existing entry",
+            });
+        case "dberror":
+            return wrapResponse(400, {
+                message: "There was a Problem checking the Database",
+            });
+    }
+}
+
+module.exports.create = async (event) => {
+    const email = event.email;
+    const name = event.name;
+    const surname = event.surname;
+
+    try {
+        return await createItem(email, name, surname);
+    } catch (err) {
+        return handleError(err);
     }
 };
