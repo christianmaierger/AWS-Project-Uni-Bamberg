@@ -11,7 +11,7 @@ function isEmpty(obj) {
     return Object.keys(obj).length === 0;
 }
 
-function validateEmail(email) {
+function isMailValid(email) {
     const validationRegex =
         /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
 
@@ -19,6 +19,12 @@ function validateEmail(email) {
         return true;
     } else {
         return false;
+    }
+}
+
+function validateEmail(email) {
+    if (!isMailValid(email)) {
+        throw errorType.badmail;
     }
 }
 
@@ -61,7 +67,19 @@ async function isAlreadyExisting(email, name) {
             return false;
         }
     } catch (error) {
-        throw "dberror";
+        throw errorType.dberror;
+    }
+}
+
+async function validateItemExists(email, name) {
+    if (!(await isAlreadyExisting(email, name))) {
+        throw errorType.idnotexists;
+    }
+}
+
+async function validateItemNotExists(email, name) {
+    if (await isAlreadyExisting(email, name)) {
+        throw errorType.idexists;
     }
 }
 
@@ -87,6 +105,11 @@ function handleError(err) {
                 message:
                     "Entry with given ID already exists, please use update to overide an existing entry",
             });
+
+        default:
+            return wrapResponse(405, {
+                message: "Unknown error thrown: " + err,
+            });
     }
 }
 
@@ -106,4 +129,6 @@ module.exports = {
     TableName,
     GetFunction,
     errorType,
+    validateItemExists,
+    validateItemNotExists,
 };

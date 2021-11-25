@@ -8,17 +8,13 @@ const {
     wrapParams,
     handleError,
     errorType,
-    isAlreadyExisting,
+    validateItemExists,
 } = require("../shared");
 
 async function deleteItem(email, name) {
-    if (!validateEmail(email)) {
-        throw errorType.badmail;
-    }
+    validateEmail(email);
 
-    if (!(await isAlreadyExisting(email, name))) {
-        throw errorType.idnotexists;
-    }
+    await validateItemExists(email, name);
 
     const item = { email, name };
     const params = wrapParams("Key", item);
