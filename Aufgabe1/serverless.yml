@@ -37,7 +37,7 @@ functions:
                   - dynamodb:GetShardIterator
                   - dynamodb:ListStreams
               Resource:
-                  - "Fn::GetAtt": [UsersTable, Arn] # Fn::GetAtt: [ logicalNameOfResource, attributeName ] - this is for getting the Arn(Identifier) of the resource usersTable
+                  - "Fn::GetAtt": [UsersTable, Arn]
     read:
         handler: handler/read.read
         name: read
@@ -47,7 +47,7 @@ functions:
               Action:
                   - dynamodb:GetItem
               Resource:
-                  - "Fn::GetAtt": [UsersTable, Arn] # Fn::GetAtt: [ logicalNameOfResource, attributeName ] - this is for getting the Arn(Identifier) of the resource usersTable
+                  - "Fn::GetAtt": [UsersTable, Arn]
     create:
         handler: handler/create.create
         iamRoleStatementsName: writeToDBRole #optional custom role name setting instead of the default generated one
@@ -56,12 +56,11 @@ functions:
               Action:
                   - dynamodb:PutItem
               Resource:
-                  - "Fn::GetAtt": [UsersTable, Arn] # Fn::GetAtt: [ logicalNameOfResource, attributeName ] - this is for getting the Arn(Identifier) of the resource usersTable
+                  - "Fn::GetAtt": [UsersTable, Arn]
             - Effect: "Allow"
               Action:
                   - lambda:InvokeFunction
               Resource:
-                  #  - "Fn::GetAtt": [ ReadLambdaFunction , Arn ] longer way to get the arn JSON like
                   - !GetAtt ReadLambdaFunction.Arn # shortcut to get arn, yaml syntax
     update:
         handler: handler/update.update
@@ -70,7 +69,7 @@ functions:
               Action:
                   - dynamodb:PutItem
               Resource:
-                  - "Fn::GetAtt": [UsersTable, Arn] # Fn::GetAtt: [ logicalNameOfResource, attributeName ] - this is for getting the Arn(Identifier) of the resource usersTable
+                  - "Fn::GetAtt": [UsersTable, Arn]
             - Effect: "Allow"
               Action:
                   - lambda:InvokeFunction
