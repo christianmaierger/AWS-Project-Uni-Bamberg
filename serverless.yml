@@ -1,6 +1,6 @@
 service: task2
 
-frameworkVersion: '2'
+frameworkVersion: "2"
 
 provider:
     name: aws
@@ -75,7 +75,6 @@ functions:
               Action:
                   - lambda:InvokeFunction
               Resource:
-                  #  - "Fn::GetAtt": [ ReadLambdaFunction , Arn ] longer way to get the arn JSON like
                   - !GetAtt ReadLambdaFunction.Arn # shortcut to get arn, yaml syntax
     delete:
         handler: handler/delete.delete
@@ -92,24 +91,24 @@ functions:
                   - !GetAtt ReadLambdaFunction.Arn # shortcut to get arn, yaml syntax
 
 resources: # CloudFormation template syntax from here on.
-  Resources:
-    UsersTable: #must be same as TableName
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: ${file(./env.yml):Table_Name}
-        AttributeDefinitions:
-          - AttributeName: ${file(./env.yml):Partition_Key}
-            AttributeType: S # S = String, N would be for Number
-          - AttributeName: ${file(./env.yml):Sort_Key}
-            AttributeType: S # S for String
-        KeySchema:
-          - AttributeName: ${file(./env.yml):Partition_Key}
-            KeyType: HASH   # primary key
-          - AttributeName: ${file(./env.yml):Sort_Key}
-            KeyType: RANGE  # sort key
-        StreamSpecification:
-           StreamViewType: NEW_IMAGE
-        BillingMode: PAY_PER_REQUEST
+    Resources:
+        UsersTable: #must be same as TableName
+            Type: AWS::DynamoDB::Table
+            Properties:
+                TableName: ${file(./env.yml):Table_Name}
+                AttributeDefinitions:
+                    - AttributeName: ${file(./env.yml):Partition_Key}
+                      AttributeType: S # S = String, N would be for Number
+                    - AttributeName: ${file(./env.yml):Sort_Key}
+                      AttributeType: S # S for String
+                KeySchema:
+                    - AttributeName: ${file(./env.yml):Partition_Key}
+                      KeyType: HASH # primary key
+                    - AttributeName: ${file(./env.yml):Sort_Key}
+                      KeyType: RANGE # sort key
+                StreamSpecification:
+                    StreamViewType: NEW_IMAGE
+                BillingMode: PAY_PER_REQUEST
 
 plugins:
     - serverless-iam-roles-per-function
