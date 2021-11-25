@@ -74,7 +74,7 @@ function handleError(err) {
 
         case "idnotexists":
             return wrapResponse(404, {
-                message: "There is no entry to be updated",
+                message: "There is no entry for the given data",
             });
 
         case "dberror":

@@ -16,7 +16,8 @@ async function getItem(email, name) {
         throw errorType.badmail;
     }
 
-    if (!isAlreadyExisting(email, name)) {
+    if (!(await isAlreadyExisting(email, name))) {
+        console.log("Id does not exist");
         throw errorType.idnotexists;
     }
 
