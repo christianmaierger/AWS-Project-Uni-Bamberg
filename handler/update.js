@@ -25,7 +25,7 @@ module.exports.update = async (event) => {
                 Payload: JSON.stringify(event, null, 2), // pass params
             })
             .promise();
-        let payload = JSON.parse(response.Payload);
+        const payload = JSON.parse(response.Payload);
         if (payload.statusCode === 404) {
             //No Item found -> cant update it
             return wrapResponse(404, {
@@ -38,7 +38,7 @@ module.exports.update = async (event) => {
         });
     }
 
-    let params = wrapParams("Item", event);
+    const params = wrapParams("Item", event);
     try {
         await docClient.put(params).promise();
         return wrapResponse(200, { message: "Entry updated successfully" });

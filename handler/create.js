@@ -24,7 +24,7 @@ module.exports.create = async (event) => {
                 Payload: JSON.stringify(event, null, 2), // pass params
             })
             .promise();
-        let payload = JSON.parse(response.Payload);
+        const payload = JSON.parse(response.Payload);
         if (payload.statusCode === 200) {
             return wrapResponse(405, {
                 message:

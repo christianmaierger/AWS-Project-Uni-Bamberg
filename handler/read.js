@@ -19,7 +19,7 @@ module.exports.read = async (event) => {
     const params = wrapParams("Key", { email: event.email, name: event.name });
 
     try {
-        let response = await docClient.get(params).promise();
+        const response = await docClient.get(params).promise();
         if (response && isEmpty(response)) {
             return wrapResponse(404, {
                 message: "No entry matched the given parameters.",

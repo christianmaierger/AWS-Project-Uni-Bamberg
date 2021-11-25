@@ -25,7 +25,7 @@ module.exports.delete = async (event) => {
                 Payload: JSON.stringify(event, null, 2), // pass params
             })
             .promise();
-        let payload = JSON.parse(response.Payload);
+        const payload = JSON.parse(response.Payload);
         if (payload.statusCode === 404) {
             //No Item found -> cant delete it
             return wrapResponse(404, {
@@ -38,7 +38,7 @@ module.exports.delete = async (event) => {
         });
     }
 
-    let params = wrapParams("Key", event);
+    const params = wrapParams("Key", event);
     try {
         await docClient.delete(params).promise();
         return wrapResponse(200, { message: "Entry deleted successfully" });
