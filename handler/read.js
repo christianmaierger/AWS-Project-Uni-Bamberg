@@ -6,20 +6,31 @@ const {
     validateEmail,
     wrapParams,
     wrapResponse,
-    isAlreadyExisting,
     errorType,
     handleError,
+    isEmpty,
 } = require("../shared");
 
-async function getItem(email, name) {
-    if (!validateEmail(email)) {
-        throw errorType.badmail;
+// validates that an item exists (will be used by many most of the other functions two)
+async function validateItemExists(email, name) {
+    const params = wrapParams("Key", { email: email, name: name });
+    try {
+        const response = await docClient.get(params).promise();
+        if (response && isEmpty(response)) {
+            throw errorType.idnotexists;
+        }
+    } catch (error) {
+        if (error == errorType.idnotexists) {
+            throw errorType.idnotexists;
+        }
+        throw errorType.dberror;
     }
+}
 
-    if (!(await isAlreadyExisting(email, name))) {
-        console.log("Id does not exist");
-        throw errorType.idnotexists;
-    }
+async function getItem(email, name) {
+    validateEmail(email);
+
+    await validateItemExists(email, name);
 
     const params = wrapParams("Key", { email: email, name: name });
     try {

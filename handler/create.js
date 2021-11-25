@@ -7,13 +7,11 @@ const {
     wrapResponse,
     wrapParams,
     handleError,
-    isAlreadyExisting,
     errorType,
+    validateItemNotExists,
 } = require("../shared");
 
-async function putItemToDatabase(email, name, surname) {
-    const item = { email, name, surname };
-
+async function putItemToDatabase(item) {
     const params = wrapParams("Item", item);
 
     try {
@@ -23,25 +21,17 @@ async function putItemToDatabase(email, name, surname) {
     }
 }
 
-async function createItem(email, name, surname) {
-    if (!validateEmail(email)) {
-        throw errorType.badmail;
-    }
+async function createItem(item) {
+    validateEmail(item.email);
 
-    if (await isAlreadyExisting(email, name)) {
-        throw errorType.idexists;
-    }
+    await validateItemNotExists(item.email, item.name);
 
-    return await putItemToDatabase(email, name, surname);
+    return await putItemToDatabase(item);
 }
 
 module.exports.create = async (event) => {
-    const email = event.email;
-    const name = event.name;
-    const surname = event.surname;
-
     try {
-        await createItem(email, name, surname);
+        await createItem(event);
         return wrapResponse(200, { message: "Creation of entry successful" });
     } catch (err) {
         return handleError(err);
