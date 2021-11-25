@@ -1,5 +1,6 @@
 "use strict";
 
+// get shared functions and variables
 const {
     docClient,
     validateEmail,
@@ -36,7 +37,7 @@ module.exports.create = async (event) => {
         });
     }
 
-    let params = wrapParams("Item", event);
+    const params = wrapParams("Item", event);
     try {
         await docClient.put(params).promise();
         return wrapResponse(200, { message: "Creation of entry successful" });

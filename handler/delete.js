@@ -1,5 +1,6 @@
 "use strict";
 
+// get shared functions and variables
 const {
     docClient,
     validateEmail,
