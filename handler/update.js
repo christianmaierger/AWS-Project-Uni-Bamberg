@@ -7,25 +7,26 @@ const {
     wrapResponse,
     wrapParams,
     isAlreadyExisting,
+    handleError,
+    errorType,
 } = require("../shared");
 
 async function updateItem(email, name, surname) {
     if (!validateEmail(email)) {
-        throw "badmail";
+        throw errorType.badmail;
     }
 
     // check if an item can be found under given id
-    if (!(await isAlreadyExisting(email, name, surname))) {
-        throw "idnotexists";
+    if (!(await isAlreadyExisting(email, name))) {
+        throw errorType.idnotexists;
     }
 
     const item = { email, name, surname };
     const params = wrapParams("Item", item);
     try {
         await docClient.put(params).promise();
-        return wrapResponse(200, { message: "Entry updated successfully" });
     } catch (error) {
-        return wrapResponse(error.statusCode, { message: error.message });
+        throw errorType.dberror;
     }
 }
 
@@ -35,17 +36,9 @@ module.exports.update = async (event) => {
     const surname = event.surname;
 
     try {
-        return await updateItem(email, name, surname);
+        await updateItem(email, name, surname);
+        return wrapResponse(200, { message: "Entry updated successfully" });
     } catch (err) {
-        switch (err) {
-            case "badmail":
-                return wrapResponse(400, {
-                    message: "Bad Request: Not a valid email-adress",
-                });
-            case "idnotexists":
-                return wrapResponse(404, {
-                    message: "There is no entry to be updated",
-                });
-        }
+        return handleError(err);
     }
 };

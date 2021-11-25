@@ -6,43 +6,38 @@ const {
     validateEmail,
     wrapResponse,
     wrapParams,
-    GetFunction,
-    lambda,
+    handleError,
+    errorType,
+    isAlreadyExisting,
 } = require("../shared");
 
-module.exports.delete = async (event) => {
-    if (!validateEmail(event.email)) {
-        return wrapResponse(400, {
-            message: "Bad Request: Not a valid email-adress",
-        });
+async function deleteItem(email, name) {
+    if (!validateEmail(email)) {
+        throw errorType.badmail;
     }
 
-    try {
-        const response = await lambda
-            .invoke({
-                FunctionName: GetFunction,
-                InvocationType: "RequestResponse", // is default
-                Payload: JSON.stringify(event, null, 2), // pass params
-            })
-            .promise();
-        const payload = JSON.parse(response.Payload);
-        if (payload.statusCode === 404) {
-            //No Item found -> cant delete it
-            return wrapResponse(404, {
-                message: "There is no entry to be deleted",
-            });
-        }
-    } catch (error) {
-        return wrapResponse(400, {
-            message: "There was a Problem checking the Database",
-        });
+    if (!(await isAlreadyExisting(email, name))) {
+        throw errorType.idnotexists;
     }
 
-    const params = wrapParams("Key", event);
+    const item = { email, name };
+    const params = wrapParams("Key", item);
+
     try {
         await docClient.delete(params).promise();
-        return wrapResponse(200, { message: "Entry deleted successfully" });
     } catch (error) {
-        return wrapResponse(error.statusCode, { message: error.message });
+        throw errorType.dberror;
+    }
+}
+
+module.exports.delete = async (event) => {
+    const email = event.email;
+    const name = event.name;
+
+    try {
+        await deleteItem(email, name);
+        return wrapResponse(200, { message: "Entry deleted successfully" });
+    } catch (err) {
+        return handleError(err);
     }
 };

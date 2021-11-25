@@ -22,6 +22,13 @@ function validateEmail(email) {
     }
 }
 
+const errorType = {
+    badmail: "badmail",
+    idnotexists: "idnotexists",
+    dberror: "dberror",
+    idexists: "idexists",
+};
+
 function wrapResponse(statusCode, data) {
     return {
         statusCode: statusCode,
@@ -35,8 +42,8 @@ function wrapParams(key, data, tableName = TableName) {
     return params;
 }
 
-async function isAlreadyExisting(email, name, surname) {
-    const item = { email, name, surname };
+async function isAlreadyExisting(email, name) {
+    const item = { email, name };
 
     try {
         const response = await lambda
@@ -50,9 +57,36 @@ async function isAlreadyExisting(email, name, surname) {
 
         if (payload.statusCode === 200) {
             return true;
+        } else {
+            return false;
         }
     } catch (error) {
         throw "dberror";
+    }
+}
+
+function handleError(err) {
+    switch (err) {
+        case "badmail":
+            return wrapResponse(400, {
+                message: "Bad Request: Not a valid email-adress",
+            });
+
+        case "idnotexists":
+            return wrapResponse(404, {
+                message: "There is no entry to be updated",
+            });
+
+        case "dberror":
+            return wrapResponse(400, {
+                message: "There was a Problem checking the Database",
+            });
+
+        case "idexists":
+            return wrapResponse(405, {
+                message:
+                    "Entry with given ID already exists, please use update to overide an existing entry",
+            });
     }
 }
 
@@ -68,6 +102,8 @@ module.exports = {
     wrapResponse,
     wrapParams,
     isAlreadyExisting,
+    handleError,
     TableName,
     GetFunction,
+    errorType,
 };
