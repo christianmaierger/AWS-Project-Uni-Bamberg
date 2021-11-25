@@ -1,6 +1,6 @@
-service: task1
+service: task2
 
-frameworkVersion: "2"
+frameworkVersion: '2'
 
 provider:
     name: aws
@@ -40,7 +40,7 @@ functions:
                   - "Fn::GetAtt": [UsersTable, Arn] # Fn::GetAtt: [ logicalNameOfResource, attributeName ] - this is for getting the Arn(Identifier) of the resource usersTable
     read:
         handler: handler/read.read
-        name: read
+        name: read2
         iamRoleStatementsName: readFromDBRole #optional custom role name setting instead of the default generated one
         iamRoleStatements:
             - Effect: "Allow"
@@ -48,10 +48,6 @@ functions:
                   - dynamodb:GetItem
               Resource:
                   - "Fn::GetAtt": [UsersTable, Arn] # Fn::GetAtt: [ logicalNameOfResource, attributeName ] - this is for getting the Arn(Identifier) of the resource usersTable
-            #events:
-            #- http:
-            #path: Hier route eintragen
-            #method: GET
     create:
         handler: handler/create.create
         iamRoleStatementsName: writeToDBRole #optional custom role name setting instead of the default generated one
@@ -88,52 +84,32 @@ functions:
               Action:
                   - dynamodb:DeleteItem
               Resource:
-                  - "Fn::GetAtt": [UsersTable, Arn] # Fn::GetAtt: [ logicalNameOfResource, attributeName ] - this is for getting the Arn(Identifier) of the resource usersTable
+                  - "Fn::GetAtt": [UsersTable, Arn] # longer way to get the arn JSON like
             - Effect: "Allow"
               Action:
                   - lambda:InvokeFunction
               Resource:
-                  #  - "Fn::GetAtt": [ ReadLambdaFunction , Arn ] longer way to get the arn JSON like
                   - !GetAtt ReadLambdaFunction.Arn # shortcut to get arn, yaml syntax
 
 resources: # CloudFormation template syntax from here on.
-    Resources:
-        UsersTable: #must be same as TableName
-            Type: AWS::DynamoDB::Table
-            Properties:
-                TableName: ${file(./env.yml):Table_Name}
-                AttributeDefinitions:
-                    - AttributeName: ${file(./env.yml):Partition_Key}
-                      AttributeType: S # S = String, N would be for Number
-                    - AttributeName: ${file(./env.yml):Sort_Key}
-                      AttributeType: S # S for String
-                KeySchema:
-                    - AttributeName: ${file(./env.yml):Partition_Key}
-                      KeyType: HASH # primary key
-                    - AttributeName: ${file(./env.yml):Sort_Key}
-                      KeyType: RANGE # sort key
-                # LocalSecondaryIndexes:
-                # - IndexName: by-Surname
-                #   KeySchema:
-                #   - AttributeName: ID
-                #     KeyType: HASH
-                #   - AttributeName: Surname
-                #     KeyType: RANGE
-                #   Projection:
-                #     ProjectionType: ALL
-                # - IndexName: by-Name
-                #   KeySchema:
-                #   - AttributeName: ID
-                #     KeyType: HASH
-                #   - AttributeName: Name
-                #     KeyType: RANGE
-                #   Projection:
-                #     ProjectionType: ALL
-                StreamSpecification:
-                    StreamViewType: NEW_AND_OLD_IMAGES
-                BillingMode: PAY_PER_REQUEST
-                # ProvisionedThroughput:
-                #  ReadCapacityUnits: 1
-                #  WriteCapacityUnits: 1
+  Resources:
+    UsersTable: #must be same as TableName
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${file(./env.yml):Table_Name}
+        AttributeDefinitions:
+          - AttributeName: ${file(./env.yml):Partition_Key}
+            AttributeType: S # S = String, N would be for Number
+          - AttributeName: ${file(./env.yml):Sort_Key}
+            AttributeType: S # S for String
+        KeySchema:
+          - AttributeName: ${file(./env.yml):Partition_Key}
+            KeyType: HASH   # primary key
+          - AttributeName: ${file(./env.yml):Sort_Key}
+            KeyType: RANGE  # sort key
+        StreamSpecification:
+           StreamViewType: NEW_IMAGE
+        BillingMode: PAY_PER_REQUEST
+
 plugins:
     - serverless-iam-roles-per-function
