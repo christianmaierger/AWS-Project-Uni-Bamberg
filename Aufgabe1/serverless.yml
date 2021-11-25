@@ -1,4 +1,4 @@
-service: task2
+service: task
 
 frameworkVersion: "2"
 
@@ -40,7 +40,7 @@ functions:
                   - "Fn::GetAtt": [UsersTable, Arn] # Fn::GetAtt: [ logicalNameOfResource, attributeName ] - this is for getting the Arn(Identifier) of the resource usersTable
     read:
         handler: handler/read.read
-        name: read2
+        name: read
         iamRoleStatementsName: readFromDBRole #optional custom role name setting instead of the default generated one
         iamRoleStatements:
             - Effect: "Allow"
