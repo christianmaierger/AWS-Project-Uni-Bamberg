@@ -11,7 +11,7 @@ provider:
     Table_Name: ${file(./env.yml):Table_Name}
     Partition_Key: ${file(./env.yml):Partition_Key}
     Sort_Key: ${file(./env.yml):Sort_Key}
-    Get_Function: "getUser"
+    Get_Function: ${self:functions.getUser.name}
 
 functions:
   logItemChanges:
@@ -45,24 +45,21 @@ functions:
       #- http:
           #path: Hier route eintragen
           #method: GET
-  putOrPost: 
+  create:
     handler: handler.create
     iamRoleStatementsName: writeToDBRole #optional custom role name setting instead of the default generated one
     iamRoleStatements:
       - Effect: "Allow"        
         Action:
           - dynamodb:PutItem
-          - dynamodb:GetItem  
-          - dynamodb:Query
         Resource:
-          - "Fn::GetAtt": [ UsersTable, Arn ] # Fn::GetAtt: [ logicalNameOfResource, attributeName ] - this is for getting the Arn(Identifier) of the resource usersTable
+          - "Fn::GetAtt": [UsersTable, Arn ] # Fn::GetAtt: [ logicalNameOfResource, attributeName ] - this is for getting the Arn(Identifier) of the resource usersTable
       - Effect: "Allow"
         Action:
           - lambda:InvokeFunction
         Resource:
-        #  - "*"
-        #  - "Fn::GetAtt": [ GetUserLambdaFunction , Arn ]
-           - !GetAtt GetUserLambdaFunction.Arn
+        #  - "Fn::GetAtt": [ GetUserLambdaFunction , Arn ] longer way to get the arn JSON like
+           - !GetAtt GetUserLambdaFunction.Arn # shortcut to get arn, yaml syntax
 
   
 resources: # CloudFormation template syntax from here on.
@@ -70,19 +67,17 @@ resources: # CloudFormation template syntax from here on.
     UsersTable: #must be same as TableName
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: UsersTable
+        TableName: ${file(./env.yml):Table_Name}
         AttributeDefinitions:
-          - AttributeName: email
-            AttributeType: S # S = String
-          - AttributeName: Name
+          - AttributeName: ${file(./env.yml):Partition_Key}
+            AttributeType: S # S = String, N would be for Number
+          - AttributeName: ${file(./env.yml):Sort_Key}
             AttributeType: S # S for String
-          # - AttributeName: Surname
-          #   AttributeType: S   
         KeySchema:
-          - AttributeName: email
-            KeyType: HASH   
-          - AttributeName: Name
-            KeyType: RANGE
+          - AttributeName: ${file(./env.yml):Partition_Key}
+            KeyType: HASH   # primary key
+          - AttributeName: ${file(./env.yml):Sort_Key}
+            KeyType: RANGE  # sort key
         # LocalSecondaryIndexes:
         # - IndexName: by-Surname
         #   KeySchema: 

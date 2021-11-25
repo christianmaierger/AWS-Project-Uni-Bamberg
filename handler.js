@@ -35,40 +35,21 @@ function isEmpty(obj) {
     return Object.keys(obj).length === 0;
 }
 
-function validateInput(event, integerID) {
-    let anyTypeID;
-    let typeOfID;
-    // also here better not test for !event.key1 as this is true if 0
-    if (!event || isNaN(event.key1) || isNaN(parseFloat(event.key1))) {
-        return;
-    }
-    typeOfID = typeof event.key1;
-    anyTypeID = event.key1;
+function validateEmail(event) {
+    var validationRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
 
-    if (typeOfID === "number") {
-        integerID = anyTypeID;
+    if (typeof myVar === 'string' && event.email.match(validationRegex)) {
+        console.log("Valid email address!");
+        return true;
+    } else {
+        console.log("Invalid email address!");
+        return false;
     }
-    if ((typeOfID === 'string')) {
-        if (!isNaN(anyTypeID) && !isNaN(parseFloat(anyTypeID))) {
-            integerID = parseInt(anyTypeID, 10);
-        } else {
-            return;
-        }
-    }
-    return integerID;
 }
 
 module.exports.getItemFromDB = async (event) => {
 
-
-    let integerID;
-
-    integerID = validateInput(event, integerID);
-
-    if (integerID === undefined) {
-        return wrapResponse(400, {message: "Bad Request: ID missing or in false format"});
-    }
-    const params = wrapParams("Key", { email: event.email });
+    const params = wrapParams("Key", { email: event.email, name: event.name });
 
     try {
         let response = await docClient.get(params).promise();
@@ -83,24 +64,23 @@ module.exports.getItemFromDB = async (event) => {
 
 
 module.exports.create = async (event) => {
+    console.log(GetFunction)
+    console.log(TableName)
 
-    let integerID;
-    integerID = validateInput(event, integerID);
-
-    if (integerID === undefined) {
-        return wrapResponse(400, {message: "Bad Request: ID missing or in false format"});
+    if(!validateEmail(event)) {
+        return wrapResponse(400, {message: "Bad Request: Not a valid email-adress"});
     }
-    // check if an iten can be found under given id
-    // then we can put or post or restrict updates
+    // check if an item can be found under given id
     try {
-        const response = await lambda.invoke({
+       const response = await lambda.invoke({
             FunctionName: GetFunction,
-            InvocationType: 'RequestResponse',
+            InvocationType: 'RequestResponse', // is default
             Payload: JSON.stringify(event, null, 2) // pass params
         }).promise();
         let payload = JSON.parse(response.Payload);
+        console.log(payload)
         if (payload.statusCode === 200) {
-            return wrapResponse(400, {message: "Entry with given ID already exists"});
+            return wrapResponse(405, {message: "Entry with given ID already exists, please use update to ovveride"});
         }
     } catch (error) {
         return wrapResponse(400, {message: "There was a Problem checking the Database"});
