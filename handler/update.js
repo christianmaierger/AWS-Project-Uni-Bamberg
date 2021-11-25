@@ -3,46 +3,49 @@
 // get shared functions and variables
 const {
     docClient,
-    lambda,
     validateEmail,
     wrapResponse,
     wrapParams,
-    GetFunction,
+    isAlreadyExisting,
 } = require("../shared");
 
-module.exports.update = async (event) => {
-    if (!validateEmail(event.email)) {
-        return wrapResponse(400, {
-            message: "Bad Request: Not a valid email-adress",
-        });
-    }
-    // check if an item can be found under given id
-    try {
-        const response = await lambda
-            .invoke({
-                FunctionName: GetFunction,
-                InvocationType: "RequestResponse", // is default
-                Payload: JSON.stringify(event, null, 2), // pass params
-            })
-            .promise();
-        const payload = JSON.parse(response.Payload);
-        if (payload.statusCode === 404) {
-            //No Item found -> cant update it
-            return wrapResponse(404, {
-                message: "There is no entry to be updated",
-            });
-        }
-    } catch (error) {
-        return wrapResponse(400, {
-            message: "There was a Problem checking the Database",
-        });
+async function updateItem(email, name, surname) {
+    if (!validateEmail(email)) {
+        throw "badmail";
     }
 
-    const params = wrapParams("Item", event);
+    // check if an item can be found under given id
+    if (!(await isAlreadyExisting(email, name, surname))) {
+        throw "idnotexists";
+    }
+
+    const item = { email, name, surname };
+    const params = wrapParams("Item", item);
     try {
         await docClient.put(params).promise();
         return wrapResponse(200, { message: "Entry updated successfully" });
     } catch (error) {
         return wrapResponse(error.statusCode, { message: error.message });
+    }
+}
+
+module.exports.update = async (event) => {
+    const email = event.email;
+    const name = event.name;
+    const surname = event.surname;
+
+    try {
+        return await updateItem(email, name, surname);
+    } catch (err) {
+        switch (err) {
+            case "badmail":
+                return wrapResponse(400, {
+                    message: "Bad Request: Not a valid email-adress",
+                });
+            case "idnotexists":
+                return wrapResponse(404, {
+                    message: "There is no entry to be updated",
+                });
+        }
     }
 };

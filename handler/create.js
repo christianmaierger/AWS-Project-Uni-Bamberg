@@ -6,29 +6,8 @@ const {
     validateEmail,
     wrapResponse,
     wrapParams,
-    GetFunction,
-    lambda,
+    isAlreadyExisting,
 } = require("../shared");
-
-async function isAlreadyExisting(email, name, surname) {
-    const item = { email, name, surname };
-
-    try {
-        const response = await lambda
-            .invoke({
-                FunctionName: GetFunction,
-                InvocationType: "RequestResponse", // is default
-                Payload: JSON.stringify(item, null, 2), // pass params
-            })
-            .promise();
-        const payload = JSON.parse(response.Payload);
-        if (payload.statusCode === 200) {
-            return true;
-        }
-    } catch (error) {
-        throw "dberror";
-    }
-}
 
 async function putItemToDatabase(email, name, surname) {
     const item = { email, name, surname };

@@ -35,6 +35,27 @@ function wrapParams(key, data, tableName = TableName) {
     return params;
 }
 
+async function isAlreadyExisting(email, name, surname) {
+    const item = { email, name, surname };
+
+    try {
+        const response = await lambda
+            .invoke({
+                FunctionName: GetFunction,
+                InvocationType: "RequestResponse", // is default
+                Payload: JSON.stringify(item, null, 2), // pass params
+            })
+            .promise();
+        const payload = JSON.parse(response.Payload);
+
+        if (payload.statusCode === 200) {
+            return true;
+        }
+    } catch (error) {
+        throw "dberror";
+    }
+}
+
 // get our reference to table from environment variables
 const TableName = process.env.Table_Name;
 const GetFunction = process.env.Get_Function;
@@ -46,6 +67,7 @@ module.exports = {
     validateEmail,
     wrapResponse,
     wrapParams,
+    isAlreadyExisting,
     TableName,
     GetFunction,
 };
