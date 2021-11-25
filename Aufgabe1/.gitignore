@@ -1,9 +1,11 @@
 # package directories
-node_modules
+node_modules/
 jspm_packages
+*/node_modules/**
 
 # Serverless directories
-.serverless
+.serverless/
+*/.serverless/**
 
 # User-specific stuff
 .idea/**/workspace.xml
