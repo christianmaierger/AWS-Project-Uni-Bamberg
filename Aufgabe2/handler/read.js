@@ -11,32 +11,23 @@ const {
     isEmpty,
 } = require("../shared");
 
-// validates that an item exists (will be used by many most of the other functions two)
-async function validateItemExists(email, name) {
+async function getItem(email, name) {
+    validateEmail(email);
+
     const params = wrapParams("Key", { email: email, name: name });
     try {
         const response = await docClient.get(params).promise();
-        if (response && isEmpty(response)) {
+
+        if (isEmpty(response)) {
             throw errorType.idnotexists;
         }
+
+        return response;
     } catch (error) {
         if (error == errorType.idnotexists) {
             throw errorType.idnotexists;
         }
-        throw errorType.dberror;
-    }
-}
 
-async function getItem(email, name) {
-    validateEmail(email);
-
-    await validateItemExists(email, name);
-
-    const params = wrapParams("Key", { email: email, name: name });
-    try {
-        const response = await docClient.get(params).promise();
-        return response;
-    } catch (error) {
         throw errorType.dberror;
     }
 }
