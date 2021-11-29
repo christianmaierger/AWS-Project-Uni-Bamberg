@@ -1,0 +1,113 @@
+service: task1
+
+frameworkVersion: "2"
+
+provider:
+    name: aws
+    runtime: nodejs12.x
+    lambdaHashingVersion: 20201221
+    region: eu-central-1
+    environment:
+        Table_Name: ${file(./env.yml):Table_Name}
+        Partition_Key: ${file(./env.yml):Partition_Key}
+        Sort_Key: ${file(./env.yml):Sort_Key}
+        Get_Function: ${self:functions.read.name}
+
+package:
+    exclude:
+        - node_modules/**
+        - package.json
+        - package-lock.json
+        - data/**
+
+functions:
+    logItemChanges:
+        handler: handler/logItemChanges.logItemChanges
+        events:
+            - stream:
+                  type: dynamodb
+                  arn:
+                      Fn::GetAtt: [UsersTable, StreamArn]
+        iamRoleStatementsName: logItemChangesRole #optional custom role name setting instead of the default generated one
+        iamRoleStatements:
+            - Effect: "Allow"
+              Action:
+                  - dynamodb:DescribeStream
+                  - dynamodb:GetRecords
+                  - dynamodb:GetShardIterator
+                  - dynamodb:ListStreams
+              Resource:
+                  - "Fn::GetAtt": [UsersTable, Arn]
+    read:
+        handler: handler/read.read
+        name: read
+        iamRoleStatementsName: readFromDBRole #optional custom role name setting instead of the default generated one
+        iamRoleStatements:
+            - Effect: "Allow"
+              Action:
+                  - dynamodb:GetItem
+              Resource:
+                  - "Fn::GetAtt": [UsersTable, Arn]
+    create:
+        handler: handler/create.create
+        iamRoleStatementsName: writeToDBRole #optional custom role name setting instead of the default generated one
+        iamRoleStatements:
+            - Effect: "Allow"
+              Action:
+                  - dynamodb:PutItem
+              Resource:
+                  - "Fn::GetAtt": [UsersTable, Arn]
+            - Effect: "Allow"
+              Action:
+                  - lambda:InvokeFunction
+              Resource:
+                  - !GetAtt ReadLambdaFunction.Arn # shortcut to get arn, yaml syntax
+    update:
+        handler: handler/update.update
+        iamRoleStatements:
+            - Effect: "Allow"
+              Action:
+                  - dynamodb:PutItem
+              Resource:
+                  - "Fn::GetAtt": [UsersTable, Arn]
+            - Effect: "Allow"
+              Action:
+                  - lambda:InvokeFunction
+              Resource:
+                  - !GetAtt ReadLambdaFunction.Arn # shortcut to get arn, yaml syntax
+    delete:
+        handler: handler/delete.delete
+        iamRoleStatements:
+            - Effect: "Allow"
+              Action:
+                  - dynamodb:DeleteItem
+              Resource:
+                  - "Fn::GetAtt": [UsersTable, Arn] # longer way to get the arn JSON like
+            - Effect: "Allow"
+              Action:
+                  - lambda:InvokeFunction
+              Resource:
+                  - !GetAtt ReadLambdaFunction.Arn # shortcut to get arn, yaml syntax
+
+resources: # CloudFormation template syntax from here on.
+    Resources:
+        UsersTable: #must be same as TableName
+            Type: AWS::DynamoDB::Table
+            Properties:
+                TableName: ${file(./env.yml):Table_Name}
+                AttributeDefinitions:
+                    - AttributeName: ${file(./env.yml):Partition_Key}
+                      AttributeType: S # S = String, N would be for Number
+                    - AttributeName: ${file(./env.yml):Sort_Key}
+                      AttributeType: S # S for String
+                KeySchema:
+                    - AttributeName: ${file(./env.yml):Partition_Key}
+                      KeyType: HASH # primary key
+                    - AttributeName: ${file(./env.yml):Sort_Key}
+                      KeyType: RANGE # sort key
+                StreamSpecification:
+                    StreamViewType: NEW_IMAGE
+                BillingMode: PAY_PER_REQUEST
+
+plugins:
+    - serverless-iam-roles-per-function
