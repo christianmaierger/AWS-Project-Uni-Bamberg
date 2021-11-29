@@ -124,7 +124,6 @@ module.exports = {
     validateEmail,
     wrapResponse,
     wrapParams,
-    isAlreadyExisting,
     handleError,
     TableName,
     GetFunction,
