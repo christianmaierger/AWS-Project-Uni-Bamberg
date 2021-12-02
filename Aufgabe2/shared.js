@@ -96,7 +96,7 @@ function handleError(err) {
             });
 
         case errorType.dberror:
-            return wrapResponse(400, {
+            return wrapResponse(500, {
                 message: "There was a Problem checking the Database",
             });
 
