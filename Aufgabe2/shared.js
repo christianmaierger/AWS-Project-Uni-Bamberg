@@ -85,22 +85,22 @@ async function validateItemNotExists(email, name) {
 
 function handleError(err) {
     switch (err) {
-        case "badmail":
+        case errorType.badmail:
             return wrapResponse(400, {
                 message: "Bad Request: Not a valid email-adress",
             });
 
-        case "idnotexists":
+        case errorType.idnotexists:
             return wrapResponse(404, {
                 message: "There is no entry for the given data",
             });
 
-        case "dberror":
+        case errorType.dberror:
             return wrapResponse(400, {
                 message: "There was a Problem checking the Database",
             });
 
-        case "idexists":
+        case errorType.idexists:
             return wrapResponse(405, {
                 message:
                     "Entry with given ID already exists, please use update to overide an existing entry",
