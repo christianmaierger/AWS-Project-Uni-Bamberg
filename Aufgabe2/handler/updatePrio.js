@@ -9,22 +9,17 @@ const {
     handleError,
     errorType,
     validateItemExists,
-    validatePlz,
     validateBirthday,
-    validateGender,
     createPrioFromBirthday,
 } = require("../shared");
 
-async function updateItem(item) {
+async function updatePrio(item) {
     const email = item.email;
     const birthday = item.birthday;
     // possibly not necessary as update should be done automatically
+    validateEmail(email)
     validateBirthday(birthday)
     // check if an item can be found under given id
-    validateEmail(item.email);
-    validatePlz(item.plz);
-    validateGender(item.gender);
-
     await validateItemExists(email, birthday);
     // new prio is created
 
@@ -39,10 +34,10 @@ async function updateItem(item) {
     }
 }
 
-module.exports.update = async (event) => {
+module.exports.updatePrio = async (event) => {
     try {
-        await updateItem(event);
-        return wrapResponse(200, { message: "Entry updated successfully" });
+        await updatePrio(event);
+        return wrapResponse(200, { message: "Prio for user updated successfully" });
     } catch (err) {
         return handleError(err);
     }

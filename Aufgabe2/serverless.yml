@@ -1,4 +1,4 @@
-service: task2
+service: chris-task2
 
 frameworkVersion: "2"
 
@@ -9,6 +9,7 @@ provider:
     region: eu-central-1
     environment:
         Table_Name: ${file(./env.yml):Table_Name}
+        GSI_Name: ${file(./env.yml):Index_Name}
         Partition_Key: ${file(./env.yml):Partition_Key}
         Sort_Key: ${file(./env.yml):Sort_Key}
         Get_Function: ${self:functions.read.name}
@@ -28,7 +29,7 @@ functions:
                   type: dynamodb
                   arn:
                       Fn::GetAtt: [UsersTable, StreamArn]
-        iamRoleStatementsName: logItemChangesRole #optional custom role name setting instead of the default generated one
+       # iamRoleStatementsName: logItemChangesRole #optional custom role name setting instead of the default generated one
         iamRoleStatements:
             - Effect: "Allow"
               Action:
@@ -40,17 +41,27 @@ functions:
                   - "Fn::GetAtt": [UsersTable, Arn]
     read:
         handler: handler/read.read
-        name: read
-        iamRoleStatementsName: readFromDBRole #optional custom role name setting instead of the default generated one
+        name: ${self:service}-${sls:stage}-read
+       #name: "chris-read"
+        #iamRoleStatementsName: readFromDBRole #optional custom role name setting instead of the default generated one
         iamRoleStatements:
             - Effect: "Allow"
               Action:
                   - dynamodb:GetItem
               Resource:
                   - "Fn::GetAtt": [UsersTable, Arn]
+    listUsersByPlz:
+      handler: handler/listUsersByPlz.listUsersByPlz
+      iamRoleStatements:
+        - Effect: "Allow"
+          Action:
+            - dynamodb:GetItem
+            - dynamodb:Query
+          Resource:
+            - !Sub '${UsersTable.Arn}/index/*'
     create:
         handler: handler/create.create
-        iamRoleStatementsName: writeToDBRole #optional custom role name setting instead of the default generated one
+       # iamRoleStatementsName: writeToDBRole #optional custom role name setting instead of the default generated one
         iamRoleStatements:
             - Effect: "Allow"
               Action:
@@ -75,6 +86,19 @@ functions:
                   - lambda:InvokeFunction
               Resource:
                   - !GetAtt ReadLambdaFunction.Arn # shortcut to get arn, yaml syntax
+    updatePrio:
+      handler: handler/updatePrio.updatePrio
+      iamRoleStatements:
+        - Effect: "Allow"
+          Action:
+            - dynamodb:PutItem
+          Resource:
+            - "Fn::GetAtt": [ UsersTable, Arn ]
+        - Effect: "Allow"
+          Action:
+            - lambda:InvokeFunction
+          Resource:
+            - !GetAtt ReadLambdaFunction.Arn # shortcut to get arn, yaml syntax
     delete:
         handler: handler/delete.delete
         iamRoleStatements:
@@ -96,18 +120,41 @@ resources: # CloudFormation template syntax from here on.
             Properties:
                 TableName: ${file(./env.yml):Table_Name}
                 AttributeDefinitions:
-                    - AttributeName: ${file(./env.yml):Partition_Key}
+                    - AttributeName: ${file(./env.yml):Partition_Key}   # email
                       AttributeType: S # S = String, N would be for Number
-                    - AttributeName: ${file(./env.yml):Sort_Key}
-                      AttributeType: S # S for String
+                    - AttributeName: ${file(./env.yml):Sort_Key} # Birthday as number for better filtering with key expression
+                      AttributeType: S # N for number, must be parsed from user inputed String in ISO 8601 format!!!
+                    - AttributeName: ${file(./env.yml):Partition_Key2} # Plz
+                      AttributeType: S # S = String, N would be for Number
+#                    - AttributeName: ${file(./env.yml):Attr3} # Priority but perhaps better not as sort key, but just filter expression
+#                      AttributeType: N
+#
+#                    - AttributeName: ${file(./env.yml):Attr1} # Name
+#                      AttributeType: S # S for String
+#                    - AttributeName: ${file(./env.yml):Attr2} # Surname
+#                      AttributeType: S # S for String
+#                    - AttributeName: ${file(./env.yml):Attr2} # Gender
+#                      AttributeType: S # S for String
                 KeySchema:
                     - AttributeName: ${file(./env.yml):Partition_Key}
                       KeyType: HASH # primary key
                     - AttributeName: ${file(./env.yml):Sort_Key}
                       KeyType: RANGE # sort key
                 StreamSpecification:
-                    StreamViewType: NEW_IMAGE
+                  StreamViewType: NEW_IMAGE
                 BillingMode: PAY_PER_REQUEST
+                GlobalSecondaryIndexes:
+                  - IndexName: ${file(./env.yml):Index_Name}
+                    KeySchema:
+                      - AttributeName: ${file(./env.yml):Partition_Key2} # Plz
+                        KeyType: "HASH"
+                      - AttributeName: ${file(./env.yml):Sort_Key} # Birthday
+                        KeyType: "RANGE"
+                    Projection:
+                      NonKeyAttributes:
+                         - ${file(./env.yml):Partition_Key} # email
+                         - ${file(./env.yml):Attr3} # prio
+                      ProjectionType: "INCLUDE"
 
 plugins:
     - serverless-iam-roles-per-function
