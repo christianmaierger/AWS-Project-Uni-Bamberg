@@ -19,6 +19,7 @@ const {
 } = require('../validator');
 
 async function updateItem(item) {
+  // TODO implement that not all elements have to be given, all not given elements are meant to stay as they are
   const email = item.email;
   const birthday = item.birthday;
   // possibly not necessary as update should be done automatically

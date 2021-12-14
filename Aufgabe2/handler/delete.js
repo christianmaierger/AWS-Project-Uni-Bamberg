@@ -27,7 +27,6 @@ async function deleteItem(email, birthday) {
   try {
     await docClient.delete(params).promise();
   } catch (error) {
-    console.log(error);
     throw errorType.dberror;
   }
 }
