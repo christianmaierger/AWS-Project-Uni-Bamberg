@@ -4,25 +4,17 @@ function isMailValid(email) {
   const validationRegex =
     /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
 
-  if (email && typeof email === 'string' && email.match(validationRegex)) {
-    return true;
-  } else {
-    return false;
-  }
+  return email && typeof email === 'string' && email.match(validationRegex);
 }
 
 function isPlzValid(plz) {
   const validationRegex = /^[0-9]*$/;
-  if (
+  return (
     plz &&
     typeof plz === 'string' &&
     plz.match(validationRegex) &&
     plz.length === 5
-  ) {
-    return true;
-  } else {
-    return false;
-  }
+  );
 }
 
 function isBirthdayValid(birthday) {
@@ -35,23 +27,15 @@ function isBirthdayValid(birthday) {
 }
 
 function isGenderValid(gender) {
-  // todo more refined validation and perhaps allow no gender
-  if (
+  // TODO more refined validation and perhaps allow no gender
+  return (
     (gender && (gender === 'm' || gender === 'w' || gender === 'd')) ||
     !gender
-  ) {
-    return true;
-  } else {
-    return false;
-  }
+  );
 }
 
 function isPrioValid(prio) {
-  if (prio === 1 || prio === 2 || prio === 3) {
-    return true;
-  } else {
-    return false;
-  }
+  return (prio === 1 || prio === 2 || prio === 3);
 }
 
 function validateEmail(email) {

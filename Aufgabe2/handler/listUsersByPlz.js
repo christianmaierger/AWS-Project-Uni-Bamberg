@@ -44,7 +44,7 @@ async function getUsers(plz, birthday, prio, n) {
   console.log('Die gesamte Rückgabe ist ' + response.Items);
   console.log('n ist ' + n);
 
-  for (var i = 0; i < n; i++) {
+  for (let i = 0; i < n; i++) {
     let elem = response.Items[i];
     resList.push(elem);
   }

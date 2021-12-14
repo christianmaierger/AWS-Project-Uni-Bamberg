@@ -31,8 +31,7 @@ async function updateItem(item) {
   await validateItemExists(email, birthday);
   // new prio is created
 
-  const prio = createPrioFromBirthday(item.birthday);
-  item.prio = prio;
+  item.prio = createPrioFromBirthday(item.birthday);
 
   const params = wrapParams('Item', item);
   try {

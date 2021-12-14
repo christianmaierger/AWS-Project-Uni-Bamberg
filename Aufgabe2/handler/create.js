@@ -30,14 +30,13 @@ async function putItemToDatabase(item) {
 }
 
 async function createItem(item) {
-  // todo some validation or work with items.values()
+  // TODO some validation or work with items.values()
   validateEmail(item.email);
   validatePlz(item.plz);
   validateGender(item.gender);
   validateBirthday(item.birthday);
 
-  const prio = createPrioFromBirthday(item.birthday);
-  item.prio = prio;
+  item.prio = createPrioFromBirthday(item.birthday);
 
   await validateItemNotExists(item.email, item.birthday);
 

@@ -14,7 +14,7 @@ const {
     validateEmail,
     validateItemExists,
     validateBirthday,
-  } = require('../validator');
+} = require('../validator');
 
 async function updatePrio(item) {
     const email = item.email;
@@ -24,10 +24,9 @@ async function updatePrio(item) {
     validateBirthday(birthday)
     // check if an item can be found under given id
     await validateItemExists(email, birthday);
-    // new prio is created
 
-    const prio = createPrioFromBirthday(item.birthday);
-    item.prio=prio;
+    // new prio is created
+    item.prio = createPrioFromBirthday(item.birthday);
 
     const params = wrapParams("Item", item);
     try {
@@ -40,7 +39,7 @@ async function updatePrio(item) {
 module.exports.updatePrio = async (event) => {
     try {
         await updatePrio(event);
-        return wrapResponse(200, { message: "Prio for user updated successfully" });
+        return wrapResponse(200, {message: "Prio for user updated successfully"});
     } catch (err) {
         return handleError(err);
     }

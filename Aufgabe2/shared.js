@@ -39,11 +39,7 @@ async function isAlreadyExisting(email, birthday) {
             .promise();
         const payload = JSON.parse(response.Payload);
 
-        if (payload.statusCode === 200) {
-            return true;
-        } else {
-            return false;
-        }
+        return (payload.statusCode === 200);
     } catch (error) {
         throw errorType.dberror;
     }
@@ -56,7 +52,6 @@ function  createPrioFromBirthday(birthday) {
     // perhaps try to parse otehr formats to YYYY-MM-DD or enforce this type
 
     let today = new Date();
-    let now = Date.now()
     console.log("now is: " + today);
     console.log("today is: " + today);
     let birthDate = new Date( birthday);

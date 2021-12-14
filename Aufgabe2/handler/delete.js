@@ -17,7 +17,7 @@ const {
 
 async function deleteItem(email, birthday) {
   validateEmail(email);
-  validateBirthday(item.birthday);
+  validateBirthday(birthday);
 
   await validateItemExists(email, birthday);
 
