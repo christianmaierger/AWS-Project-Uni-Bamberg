@@ -1,4 +1,4 @@
-service: lukas-task2
+service: task2
 
 frameworkVersion: "2"
 
