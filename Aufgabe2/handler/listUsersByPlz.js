@@ -1,7 +1,6 @@
 'use strict';
 
 // get shared functions and variables
-// TODO umbasteln
 const {
     docClient,
     wrapResponse,
@@ -13,8 +12,11 @@ const {
 
 const {validatePlz, validatePrio} = require('../validator');
 
-async function getUsers(plz, priority, n) {
+async function getUsers(item, n) {
+    const {plz, priority} = item;
+
     validatePlz(plz);
+    validatePrio(priority);
 
     if (n === 0) {
         return [];
@@ -27,8 +29,7 @@ async function getUsers(plz, priority, n) {
                 TableName: TableName,
                 IndexName: GSIName,
                 KeyConditionExpression: 'plz = :plz', // KeyConditionExpression using indexed attributes
-                ExpressionAttributeValues: {
-                    // <----- ExpressionAttributeValues using indexed attributes
+                ExpressionAttributeValues: {// <----- ExpressionAttributeValues using indexed attributes
                     ':plz': plz,
                     ':prio': priority,
                 },
@@ -55,12 +56,10 @@ module.exports.listUsersByPlz = async (event) => {
     const plz = event.item.plz;
     const priority = event.item.prio;
     const n = event.n;
-
-    validatePlz(plz);
-    validatePrio(priority);
+    const item = {plz, priority};
 
     try {
-        const response = await getUsers(plz, priority, n);
+        const response = await getUsers(item, n);
         if (isEmpty(response)) {
             return wrapResponse(404, 'Query did not return any user.');
         }
