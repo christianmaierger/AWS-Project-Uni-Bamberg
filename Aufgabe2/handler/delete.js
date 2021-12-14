@@ -21,12 +21,13 @@ async function deleteItem(email, birthday) {
 
   await validateItemExists(email, birthday);
 
-  const item = { email, name: birthday };
+  const item = { email, birthday };
   const params = wrapParams('Key', item);
 
   try {
     await docClient.delete(params).promise();
   } catch (error) {
+    console.log(error);
     throw errorType.dberror;
   }
 }
