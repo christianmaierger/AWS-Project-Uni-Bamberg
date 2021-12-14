@@ -1,21 +1,24 @@
 'use strict';
 
 // get shared functions and variables
-// TODO write local lambda function invokes
+// TODO umbasteln
 const {
     docClient,
     wrapResponse,
     errorType,
     handleError,
     TableName,
-    GSIName,
+    GSIName, isEmpty,
 } = require('../shared');
 
-const {validateBirthday, validatePlz, validatePrio} = require('../validator');
+const {validatePlz, validatePrio} = require('../validator');
 
-async function getUsers(plz, birthday, prio, n) {
+async function getUsers(plz, priority, n) {
     validatePlz(plz);
-    validateBirthday(birthday);
+
+    if (n === 0) {
+        return [];
+    }
 
     let response;
     try {
@@ -27,47 +30,40 @@ async function getUsers(plz, birthday, prio, n) {
                 ExpressionAttributeValues: {
                     // <----- ExpressionAttributeValues using indexed attributes
                     ':plz': plz,
-                    //  ':birthday': " 1990-01-01",
-                    ':prio': prio,
+                    ':prio': priority,
                 },
                 ScanIndexForward: true, // this detirmines if sorted ascending or descending by range key
-                FilterExpression: 'prio = :prio',
+                FilterExpression: 'priority = :priority',
             })
             .promise();
     } catch (error) {
-        console.log(error);
         if (error == errorType.idnotexists) {
             throw errorType.idnotexists;
         }
         throw errorType.dberror;
     }
-    let resList = [];
-    console.log('Die gesamte Rückgabe ist ' + response.Items);
-    console.log('n ist ' + n);
 
-    for (let i = 0; i < n; i++) {
-        let elem = response.Items[i];
-        resList.push(elem);
+    let resultList = response.Items;
+    console.log(resultList);
+    if (resultList.length > n) {
+        return resultList.splice(0, n);
     }
-    console.log(resList);
-    return resList;
+
+    return resultList;
 }
 
 module.exports.listUsersByPlz = async (event) => {
     const plz = event.item.plz;
-    const birthday = event.item.birthday;
-    const prio = event.item.prio;
+    const priority = event.item.prio;
     const n = event.n;
 
-    validateBirthday(birthday);
     validatePlz(plz);
-    validatePrio(prio);
+    validatePrio(priority);
 
     try {
-        const response = await getUsers(plz, birthday, prio, n);
-        console.log('response ist ' + response);
-        if (response.isEmpty()) {
-            return wrapResponse(404, 'Query did not return any User');
+        const response = await getUsers(plz, priority, n);
+        if (isEmpty(response)) {
+            return wrapResponse(404, 'Query did not return any user.');
         }
         return wrapResponse(200, response);
     } catch (err) {
