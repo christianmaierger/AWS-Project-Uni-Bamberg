@@ -128,9 +128,8 @@ function handleError(err) {
                 message:
                     "Entry with given ID already exists, please use update to overide an existing entry",
             });
-            // todo really 405 method not allowed as default?
         default:
-            return wrapResponse(405, {
+            return wrapResponse(418, {
                 message: "Unknown error thrown: " + err,
             });
     }
