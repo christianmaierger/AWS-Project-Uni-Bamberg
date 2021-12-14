@@ -25,10 +25,7 @@ function isBirthdayValid(birthday) {
 }
 
 function isGenderValid(gender) {
-    return (
-        (gender && (gender === 'm' || gender === 'w' || gender === 'd')) ||
-        !gender
-    );
+    return gender && (gender === 'm' || gender === 'w' || gender === 'd');
 }
 
 function isPrioValid(prio) {
@@ -59,28 +56,49 @@ function validateGender(gender) {
     }
 }
 
-function validatePrio(gender) {
-    if (!isPrioValid(gender)) {
-        throw errorType.badGender;
+function validatePrio(prio) {
+    if (!isPrioValid(prio)) {
+        throw errorType.badPrio;
     }
 }
 
 function validateName(name) {
-    if (name === undefined) {
+    if (!name || name === {}) {
         throw errorType.badName;
     }
 
-    //const regex = /[A-Z,a-z]*/;
     const regex = /^([a-zA-Z]+\s)*[a-zA-Z]+$/;
     const surname = name.surname;
     const lastname = name.lastname;
 
-    if (surname === undefined || lastname === undefined) {
+    if (!surname || !lastname) {
         throw errorType.badName;
     }
 
     if (!surname.match(regex) || !lastname.match(regex)) {
         throw errorType.badName;
+    }
+}
+
+function validateItem(item){
+    validateEmail(item.email);
+    validateBirthday(item.birthday);
+
+    for (let key of Object.keys(item)){
+        const element = item[key];
+        switch (key) {
+            case "plz":
+                validatePlz(element);
+                break;
+            case "name":
+                validateName(element);
+                break;
+            case "gender":
+                validateGender(element);
+                break;
+            case "prio":
+                validatePrio(element);
+        }
     }
 }
 
@@ -107,4 +125,5 @@ module.exports = {
     validateName,
     validateItemExists,
     validateItemNotExists,
+    validateItem
 };

@@ -25,16 +25,33 @@ function wrapParams(key, data, tableName = TableName) {
     return params;
 }
 
-function wrapUpdateParams(data, updateExpression="set prio = :p", tableName=TableName){
-    const prio = data.prio;
-    delete data.prio;
+function wrapUpdateParams(item, tableName = TableName) {
+    const itemKeys = Object.keys(item);
 
-    let params = wrapParams("Key", data, tableName);
+    let updateExpression = 'set';
+    let expressionAttributeValues = {};
+
+    let counter = 0;
+
+    for (let key of itemKeys) {
+        if (key !== 'email' && key !== 'birthday') {
+            const placeHolderVariable = `:${String.fromCharCode(counter + 97)}`;
+
+            updateExpression += ` ${key} = ${placeHolderVariable},`;
+            expressionAttributeValues[placeHolderVariable] = item[key];
+            counter++;
+        }
+    }
+
+    updateExpression = updateExpression.slice(0, -1);
+
+    const email = item.email;
+    const birthday = item.birthday;
+
+    let params = wrapParams('Key', {email, birthday}, tableName);
     params.UpdateExpression = updateExpression;
-    params.ExpressionAttributeValues = {
-        ":p" : prio,
-    };
-    params.ReturnValues = "UPDATED_NEW";
+    params.ExpressionAttributeValues = expressionAttributeValues;
+    params.ReturnValues = 'UPDATED_NEW';
 
     return params;
 }

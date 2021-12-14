@@ -1,6 +1,5 @@
 "use strict";
 
-// TODO write local invokes
 // get shared functions and variables
 const {
     docClient,
