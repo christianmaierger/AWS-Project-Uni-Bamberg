@@ -3,15 +3,18 @@
 // get shared functions and variables
 const {
     docClient,
-    validateEmail,
     wrapResponse,
     wrapParams,
     handleError,
     errorType,
-    validateItemExists,
-    validateBirthday,
     createPrioFromBirthday,
 } = require("../shared");
+
+const {
+    validateEmail,
+    validateItemExists,
+    validateBirthday,
+  } = require('../validator');
 
 async function updatePrio(item) {
     const email = item.email;
