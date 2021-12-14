@@ -25,8 +25,22 @@ function wrapParams(key, data, tableName = TableName) {
     return params;
 }
 
+function wrapUpdateParams(data, updateExpression="set prio = :p", tableName=TableName){
+    const prio = data.prio;
+    delete data.prio;
+
+    let params = wrapParams("Key", data, tableName);
+    params.UpdateExpression = updateExpression;
+    params.ExpressionAttributeValues = {
+        ":p" : prio,
+    };
+    params.ReturnValues = "UPDATED_NEW";
+
+    return params;
+}
+
 async function isAlreadyExisting(email, birthday) {
-    const item = {email: email, birthday: birthday};
+    const item = {item: {email: email, birthday: birthday}};
 
     try {
         const response = await lambda
@@ -148,6 +162,7 @@ module.exports = {
     isEmpty,
     wrapResponse,
     wrapParams,
+    wrapUpdateParams,
     handleError,
     TableName,
     GSIName,

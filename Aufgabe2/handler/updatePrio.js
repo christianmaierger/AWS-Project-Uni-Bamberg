@@ -8,7 +8,7 @@ const {
     wrapParams,
     handleError,
     errorType,
-    createPrioFromBirthday,
+    createPrioFromBirthday, wrapUpdateParams,
 } = require("../shared");
 
 const {
@@ -29,10 +29,13 @@ async function updatePrio(item) {
     // new prio is created
     item.prio = createPrioFromBirthday(item.birthday);
 
-    const params = wrapParams("Item", item);
+    //const params = wrapParams("Key", item);
+    const params = wrapUpdateParams(item);
+    console.log(params);
     try {
-        await docClient.put(params).promise();
+        await docClient.update(params).promise();
     } catch (error) {
+        console.log(error);
         throw errorType.dberror;
     }
 }
