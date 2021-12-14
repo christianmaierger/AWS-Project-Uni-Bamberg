@@ -32,8 +32,8 @@ async function deleteItem(email, birthday) {
 }
 
 module.exports.delete = async (event) => {
-  const email = event.email;
-  const birthday = event.birthday;
+  const email = event.item.email;
+  const birthday = event.item.birthday;
 
   try {
     await deleteItem(email, birthday);

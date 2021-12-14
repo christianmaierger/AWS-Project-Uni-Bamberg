@@ -24,13 +24,11 @@ async function putItemToDatabase(item) {
   try {
     await docClient.put(params).promise();
   } catch (error) {
-    // todo not always errors checking db, was also thrown when one request param was bad, like string for bday
     throw errorType.dberror;
   }
 }
 
 async function createItem(item) {
-  // TODO some validation or work with items.values()
   validateEmail(item.email);
   validatePlz(item.plz);
   validateGender(item.gender);
@@ -45,7 +43,7 @@ async function createItem(item) {
 
 module.exports.create = async (event) => {
   try {
-    await createItem(event);
+    await createItem(event.item);
     return wrapResponse(200, { message: 'Creation of entry successful' });
   } catch (err) {
     return handleError(err);

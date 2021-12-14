@@ -44,7 +44,7 @@ async function updateItem(item) {
 
 module.exports.update = async (event) => {
   try {
-    await updateItem(event);
+    await updateItem(event.item);
     return wrapResponse(200, { message: 'Entry updated successfully' });
   } catch (err) {
     return handleError(err);

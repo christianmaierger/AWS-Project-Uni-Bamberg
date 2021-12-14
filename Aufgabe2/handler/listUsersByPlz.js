@@ -1,6 +1,7 @@
 'use strict';
 
 // get shared functions and variables
+// TODO write local lambda function invokes
 const {
   docClient,
   wrapResponse,
@@ -53,9 +54,9 @@ async function getUsers(plz, birthday, prio, n) {
 }
 
 module.exports.listUsersByPlz = async (event) => {
-  const plz = event.plz;
-  const birthday = event.birthday;
-  const prio = event.prio;
+  const plz = event.item.plz;
+  const birthday = event.item.birthday;
+  const prio = event.item.prio;
   const n = event.n;
 
   validateBirthday(birthday);

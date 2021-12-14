@@ -1,5 +1,6 @@
 "use strict";
 
+// TODO write local invokes
 // get shared functions and variables
 const {
     docClient,
@@ -38,7 +39,7 @@ async function updatePrio(item) {
 
 module.exports.updatePrio = async (event) => {
     try {
-        await updatePrio(event);
+        await updatePrio(event.item);
         return wrapResponse(200, {message: "Prio for user updated successfully"});
     } catch (err) {
         return handleError(err);

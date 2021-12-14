@@ -18,16 +18,13 @@ function isPlzValid(plz) {
 }
 
 function isBirthdayValid(birthday) {
-  // todo validition is fine, but perhaps when string is in form YYYYMMDD - should be appended as delimeter or make form without - invalid
   // this powerfull regex validates a date String with or without - in form YYYY-MM-DD also validates only valid numbers like day only up to 31
-  //    const validationRegex = /^([0-9]{4})-?(1[0-2]|0[1-9])-?(3[01]|0[1-9]|[12][0-9])$/
   const validationRegex =
     /^([0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])$/;
   return birthday && birthday.match(validationRegex)
 }
 
 function isGenderValid(gender) {
-  // TODO more refined validation and perhaps allow no gender
   return (
     (gender && (gender === 'm' || gender === 'w' || gender === 'd')) ||
     !gender

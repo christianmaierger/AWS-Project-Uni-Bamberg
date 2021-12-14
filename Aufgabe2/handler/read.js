@@ -33,8 +33,8 @@ async function getItem(email, birthday) {
 }
 
 module.exports.read = async (event) => {
-  const email = event.email;
-  const birthday = event.birthday;
+  const email = event.item.email;
+  const birthday = event.item.birthday;
 
   try {
     const response = await getItem(email, birthday);
