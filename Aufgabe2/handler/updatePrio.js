@@ -31,11 +31,9 @@ async function updatePrio(item) {
 
     //const params = wrapParams("Key", item);
     const params = wrapUpdateParams(item);
-    console.log(params);
     try {
         await docClient.update(params).promise();
     } catch (error) {
-        console.log(error);
         throw errorType.dberror;
     }
 }

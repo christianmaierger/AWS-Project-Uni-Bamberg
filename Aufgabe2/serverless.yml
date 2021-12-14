@@ -29,7 +29,6 @@ functions:
                   type: dynamodb
                   arn:
                       Fn::GetAtt: [UsersTable, StreamArn]
-       # iamRoleStatementsName: logItemChangesRole #optional custom role name setting instead of the default generated one
         iamRoleStatements:
             - Effect: "Allow"
               Action:
@@ -42,8 +41,6 @@ functions:
     read:
         handler: handler/read.read
         name: ${self:service}-${sls:stage}-read
-       #name: "chris-read"
-        #iamRoleStatementsName: readFromDBRole #optional custom role name setting instead of the default generated one
         iamRoleStatements:
             - Effect: "Allow"
               Action:
@@ -61,7 +58,6 @@ functions:
             - !Sub '${UsersTable.Arn}/index/*'
     create:
         handler: handler/create.create
-       # iamRoleStatementsName: writeToDBRole #optional custom role name setting instead of the default generated one
         iamRoleStatements:
             - Effect: "Allow"
               Action:
@@ -126,15 +122,6 @@ resources: # CloudFormation template syntax from here on.
                       AttributeType: S # N for number, must be parsed from user inputed String in ISO 8601 format!!!
                     - AttributeName: ${file(./env.yml):Partition_Key2} # Plz
                       AttributeType: S # S = String, N would be for Number
-#                    - AttributeName: ${file(./env.yml):Attr3} # Priority but perhaps better not as sort key, but just filter expression
-#                      AttributeType: N
-#
-#                    - AttributeName: ${file(./env.yml):Attr1} # Name
-#                      AttributeType: S # S for String
-#                    - AttributeName: ${file(./env.yml):Attr2} # Surname
-#                      AttributeType: S # S for String
-#                    - AttributeName: ${file(./env.yml):Attr2} # Gender
-#                      AttributeType: S # S for String
                 KeySchema:
                     - AttributeName: ${file(./env.yml):Partition_Key}
                       KeyType: HASH # primary key

@@ -44,7 +44,6 @@ async function getUsers(plz, priority, n) {
     }
 
     let resultList = response.Items;
-    console.log(resultList);
     if (resultList.length > n) {
         return resultList.splice(0, n);
     }
@@ -67,7 +66,6 @@ module.exports.listUsersByPlz = async (event) => {
         }
         return wrapResponse(200, response);
     } catch (err) {
-        console.log(err);
         return handleError(err);
     }
 };

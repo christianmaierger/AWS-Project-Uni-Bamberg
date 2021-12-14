@@ -37,14 +37,12 @@ function isPrioValid(prio) {
 
 function validateEmail(email) {
     if (!isMailValid(email)) {
-        console.log('mail invalid');
         throw errorType.badEmail;
     }
 }
 
 function validatePlz(plz) {
     if (!isPlzValid(plz)) {
-        console.log('plz invalid');
         throw errorType.badPlz;
     }
 }

@@ -62,13 +62,9 @@ function createPrioFromBirthday(birthday) {
     let prio;
 
     let today = new Date();
-    console.log("now is: " + today);
-    console.log("today is: " + today);
     let birthDate = new Date(birthday);
-    console.log("birthday is: " + birthday);
 
     let age = today.getFullYear() - birthDate.getFullYear();
-    console.log("age is: " + age);
     let m = today.getMonth() - birthDate.getMonth();
     if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
         age--;
@@ -85,7 +81,6 @@ function createPrioFromBirthday(birthday) {
     if (age >= 140) {
         throw errorType.badBirthday
     }
-    console.log(prio)
     return prio;
 }
 
