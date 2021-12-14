@@ -26,7 +26,6 @@ function wrapParams(key, data, tableName = TableName) {
 }
 
 async function isAlreadyExisting(email, birthday) {
-    // todo distinguish bastetable and sgl checking for items
     const item = { email: email, birthday: birthday };
 
     try {
@@ -47,9 +46,6 @@ async function isAlreadyExisting(email, birthday) {
 
 function  createPrioFromBirthday(birthday) {
     let prio;
-    // todo ISO like 2000-01-02 is of the utmost significance!!!!
-    //todo refactor this function to shared.js when done debugging/testing
-    // perhaps try to parse otehr formats to YYYY-MM-DD or enforce this type
 
     let today = new Date();
     console.log("now is: " + today);
@@ -69,11 +65,10 @@ function  createPrioFromBirthday(birthday) {
     if(age>= 40 && age <60) {
         prio=2;
     }
-    // todo max age
-    if(age>= 60 && age<120) {
+    if(age>= 60 && age<140) {
         prio=1;
     }
-    if (age >=120) {
+    if (age >=140) {
         throw errorType.badBirthday
     }
     console.log(prio)
