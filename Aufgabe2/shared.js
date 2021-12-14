@@ -1,7 +1,7 @@
 // Load the AWS SDK for Node.js
 const AWS = require("aws-sdk");
 // Create DynamoDB document client
-const docClient = new AWS.DynamoDB.DocumentClient({ apiVersion: "2012-08-10" });
+const docClient = new AWS.DynamoDB.DocumentClient({apiVersion: "2012-08-10"});
 
 const lambda = new AWS.Lambda({
     region: "eu-central-1",
@@ -20,13 +20,13 @@ function wrapResponse(statusCode, data) {
 }
 
 function wrapParams(key, data, tableName = TableName) {
-    let params = { TableName: tableName };
+    let params = {TableName: tableName};
     params[key] = data;
     return params;
 }
 
 async function isAlreadyExisting(email, birthday) {
-    const item = { email: email, birthday: birthday };
+    const item = {email: email, birthday: birthday};
 
     try {
         const response = await lambda
@@ -44,13 +44,13 @@ async function isAlreadyExisting(email, birthday) {
     }
 }
 
-function  createPrioFromBirthday(birthday) {
+function createPrioFromBirthday(birthday) {
     let prio;
 
     let today = new Date();
     console.log("now is: " + today);
     console.log("today is: " + today);
-    let birthDate = new Date( birthday);
+    let birthDate = new Date(birthday);
     console.log("birthday is: " + birthday);
 
     let age = today.getFullYear() - birthDate.getFullYear();
@@ -59,16 +59,16 @@ function  createPrioFromBirthday(birthday) {
     if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
         age--;
     }
-    if(age< 40) {
-        prio=3;
+    if (age < 40) {
+        prio = 3;
     }
-    if(age>= 40 && age <60) {
-        prio=2;
+    if (age >= 40 && age < 60) {
+        prio = 2;
     }
-    if(age>= 60 && age<140) {
-        prio=1;
+    if (age >= 60 && age < 140) {
+        prio = 1;
     }
-    if (age >=140) {
+    if (age >= 140) {
         throw errorType.badBirthday
     }
     console.log(prio)
@@ -84,6 +84,7 @@ const errorType = {
     idexists: "idexists",
     badGender: "badGender",
     badPrio: "badPrio",
+    badName: "badName"
 };
 
 function handleError(err) {
@@ -122,6 +123,12 @@ function handleError(err) {
             return wrapResponse(405, {
                 message:
                     "Entry with given ID already exists, please use update to overide an existing entry",
+            });
+
+        case errorType.badName:
+            return wrapResponse(400, {
+                message:
+                    "Name is not formatted correctly.",
             });
         default:
             return wrapResponse(418, {

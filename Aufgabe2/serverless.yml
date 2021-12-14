@@ -153,6 +153,8 @@ resources: # CloudFormation template syntax from here on.
                     Projection:
                       NonKeyAttributes:
                          - ${file(./env.yml):Partition_Key} # email
+                         - ${file(./env.yml):Attr1} # surname
+                         - ${file(./env.yml):Attr2} # lastname
                          - ${file(./env.yml):Attr3} # prio
                       ProjectionType: "INCLUDE"
 

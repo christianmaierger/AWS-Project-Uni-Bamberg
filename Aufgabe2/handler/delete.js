@@ -2,43 +2,43 @@
 
 // get shared functions and variables
 const {
-  docClient,
-  wrapResponse,
-  wrapParams,
-  handleError,
-  errorType,
+    docClient,
+    wrapResponse,
+    wrapParams,
+    handleError,
+    errorType,
 } = require('../shared');
 
 const {
-  validateEmail,
-  validateItemExists,
-  validateBirthday,
+    validateEmail,
+    validateItemExists,
+    validateBirthday,
 } = require('../validator');
 
 async function deleteItem(email, birthday) {
-  validateEmail(email);
-  validateBirthday(birthday);
+    validateEmail(email);
+    validateBirthday(birthday);
 
-  await validateItemExists(email, birthday);
+    await validateItemExists(email, birthday);
 
-  const item = { email, birthday };
-  const params = wrapParams('Key', item);
+    const item = {email, birthday};
+    const params = wrapParams('Key', item);
 
-  try {
-    await docClient.delete(params).promise();
-  } catch (error) {
-    throw errorType.dberror;
-  }
+    try {
+        await docClient.delete(params).promise();
+    } catch (error) {
+        throw errorType.dberror;
+    }
 }
 
 module.exports.delete = async (event) => {
-  const email = event.item.email;
-  const birthday = event.item.birthday;
+    const email = event.item.email;
+    const birthday = event.item.birthday;
 
-  try {
-    await deleteItem(email, birthday);
-    return wrapResponse(200, { message: 'Entry deleted successfully' });
-  } catch (err) {
-    return handleError(err);
-  }
+    try {
+        await deleteItem(email, birthday);
+        return wrapResponse(200, {message: 'Entry deleted successfully'});
+    } catch (err) {
+        return handleError(err);
+    }
 };
