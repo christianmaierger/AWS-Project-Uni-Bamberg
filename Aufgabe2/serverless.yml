@@ -10,8 +10,8 @@ provider:
     environment:
         Table_Name: ${file(./env.yml):Table_Name}
         GSI_Name: ${file(./env.yml):Index_Name}
-        Partition_Key: ${file(./env.yml):Partition_Key}
-        Sort_Key: ${file(./env.yml):Sort_Key}
+        Partition_Key: ${file(./env.yml):Partition_Key} #email
+        Sort_Key: ${file(./env.yml):Sort_Key} #birthday
         Get_Function: ${self:functions.read.name}
 
 package:
@@ -55,7 +55,7 @@ functions:
             - dynamodb:GetItem
             - dynamodb:Query
           Resource:
-            - !Sub '${UsersTable.Arn}/index/*'
+            - !Sub '${UsersTable.Arn}/index/${file(./env.yml):Index_Name}'
     create:
         handler: handler/create.create
         iamRoleStatements:
@@ -138,12 +138,7 @@ resources: # CloudFormation template syntax from here on.
                       - AttributeName: ${file(./env.yml):Sort_Key} # Birthday
                         KeyType: "RANGE"
                     Projection:
-                      NonKeyAttributes:
-                         - ${file(./env.yml):Partition_Key} # email
-                         - ${file(./env.yml):Attr1} # surname
-                         - ${file(./env.yml):Attr2} # lastname
-                         - ${file(./env.yml):Attr3} # prio
-                      ProjectionType: "INCLUDE"
+                      ProjectionType: "ALL"
 
 plugins:
     - serverless-iam-roles-per-function

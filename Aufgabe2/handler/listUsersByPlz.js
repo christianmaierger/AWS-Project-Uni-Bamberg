@@ -17,7 +17,6 @@ async function getUsers(item, n) {
 
     validatePlz(plz);
     validatePrio(priority);
-
     if (n === 0) {
         return [];
     }
@@ -34,11 +33,11 @@ async function getUsers(item, n) {
                     ':prio': priority,
                 },
                 ScanIndexForward: true, // this detirmines if sorted ascending or descending by range key
-                FilterExpression: 'priority = :priority',
+                FilterExpression: 'prio = :prio',
             })
             .promise();
     } catch (error) {
-        if (error == errorType.idnotexists) {
+        if (error === errorType.idnotexists) {
             throw errorType.idnotexists;
         }
         throw errorType.dberror;
