@@ -9,18 +9,7 @@ const {
     errorType,
 } = require('../shared');
 
-const {
-    validateEmail,
-    validateItemExists,
-    validateBirthday,
-} = require('../validator');
-
 async function deleteItem(email, birthday) {
-    validateEmail(email);
-    validateBirthday(birthday);
-
-    await validateItemExists(email, birthday);
-
     const item = {email, birthday};
     const params = wrapParams('Key', item);
 
@@ -32,11 +21,10 @@ async function deleteItem(email, birthday) {
 }
 
 module.exports.delete = async (event) => {
-    const email = event.item.email;
-    const birthday = event.item.birthday;
-
     try {
-        await deleteItem(email, birthday);
+        const item = JSON.parse(event.requestContext.authorizer.item);
+
+        await deleteItem(item.email, item.birthday);
         return wrapResponse(200, {message: 'Entry deleted successfully'});
     } catch (err) {
         return handleError(err);

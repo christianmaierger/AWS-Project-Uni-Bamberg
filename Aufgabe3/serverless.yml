@@ -95,6 +95,14 @@ functions:
           - lambda:InvokeFunction
         Resource:
           - !GetAtt ReadLambdaFunction.Arn # shortcut to get arn, yaml syntax
+    events:
+      - http:
+          path: ${file(./env.yml):UserUpdatePrioPath}
+          method: post
+          authorizer:
+            identitySource: method.request.header.token
+            type: token
+            name: tokenAuthorizer
 
   delete:
     handler: handler/delete.delete
@@ -109,6 +117,14 @@ functions:
           - lambda:InvokeFunction
         Resource:
           - !GetAtt ReadLambdaFunction.Arn # shortcut to get arn, yaml syntax
+    events:
+      - http:
+          path: ${file(./env.yml):UserDeletePath}
+          method: delete
+          authorizer:
+            identitySource: method.request.header.token
+            type: token
+            name: tokenAuthorizer
 
   # Login in and out
   login:
