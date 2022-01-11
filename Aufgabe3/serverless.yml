@@ -10,10 +10,20 @@ provider:
   environment:
     Table_Name: ${file(./env.yml):Table_Name}
     GSI_Name: ${file(./env.yml):Index_Name}
-    Partition_Key: ${file(./env.yml):Partition_Key} #email
-    Sort_Key: ${file(./env.yml):Sort_Key} #birthday
+    Partition_Key: ${file(./env.yml):Partition_Key} # email
+    Sort_Key: ${file(./env.yml):Sort_Key} # birthday
     Get_Function: ${self:functions.read.name}
     Token_Index_Name: ${file(./env.yml):Token_Index_Name}
+    user_pool_id: { Ref: UserPool }
+    client_id: { Ref: UserClient }
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - cognito-idp:AdminInitiateAuth
+        - cognito-idp:AdminCreateUser
+        - cognito-idp:AdminSetUserPassword
+      Resource:
+        - Fn::GetAtt: [ UserPool, Arn ]
 
 package:
   exclude:
@@ -136,7 +146,7 @@ functions:
           authorizer:
             identitySource: method.request.header.email, method.request.header.birthday, method.request.header.password
             type: request
-            name: authorizerLogin
+            name: loginAuthorizer
 
   userLogout:
     handler: handler/logout.logout
@@ -150,6 +160,13 @@ functions:
             name: tokenAuthorizer
 
   # Admin Functions
+  adminLogin:
+    handler: handler/admin/login.login
+    events:
+      - http:
+          path: ${file(./env.yml):AdminLoginPath}
+          method: get
+
   listUsersByPlz:
     handler: handler/listUsersByPlz.listUsersByPlz
     iamRoleStatements:
@@ -174,7 +191,7 @@ functions:
           - "Fn::GetAtt": [ UsersTableLukas, Arn ]
           - !Sub "${UsersTableLukas.Arn}/index/${file(./env.yml):Token_Index_Name}"
 
-  authorizerLogin:
+  loginAuthorizer:
     handler: authorizer/loginAuthorizer.authorizer
     iamRoleStatements:
       - Effect: "Allow"
@@ -243,6 +260,32 @@ resources: # CloudFormation template syntax from here on.
                 KeyType: "RANGE"
             Projection:
               ProjectionType: "ALL"
+
+    UserPool:
+      Type: AWS::Cognito::UserPool
+      Properties:
+        UserPoolName: AdminUserPool
+        UsernameAttributes:
+          - email
+        Schema:
+          - Name: email
+            Required: true
+            Mutable: true
+        Policies:
+          PasswordPolicy:
+            MinimumLength: 8
+        AutoVerifiedAttributes: [ "email" ]
+
+    UserClient:
+      Type: AWS::Cognito::UserPoolClient
+      Properties:
+        ClientName: user-pool-ui
+        GenerateSecret: false
+        UserPoolId: { Ref: UserPool }
+        #AccessTokenValidity: 5
+        #IdTokenValidity: 5
+        ExplicitAuthFlows:
+          - "ADMIN_NO_SRP_AUTH"
 
 plugins:
   - serverless-iam-roles-per-function

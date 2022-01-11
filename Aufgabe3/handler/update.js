@@ -10,7 +10,7 @@ const {
 } = require('../shared');
 
 const {
-    validateItemExists, validateItem,
+    validateItem, validatePassword,
 } = require('../validator');
 
 function hasAllNeededNecessaryAttributes(itemChanges, item) {
@@ -50,6 +50,7 @@ async function updateItem(itemChanges, item) {
     for (const key in itemChanges) {
         const value = itemChanges[key];
         if (key === "password") {
+            validatePassword(value);
             itemChanges[key] = hashPassword(value);
         }
         updateItemBundle[key] = value;
