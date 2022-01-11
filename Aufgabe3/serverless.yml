@@ -40,7 +40,7 @@ functions:
           authorizer:
             identitySource: method.request.header.token
             type: token
-            name: authorizerFunc
+            name: tokenAuthorizer
 
   create:
     handler: handler/create.create
@@ -77,6 +77,10 @@ functions:
       - http:
           path: ${file(./env.yml):UserUpdatePath}
           method: post
+          authorizer:
+            identitySource: method.request.header.token
+            type: token
+            name: tokenAuthorizer
 
   updatePrio:
     handler: handler/updatePrio.updatePrio
@@ -130,7 +134,7 @@ functions:
           - !Sub '${UsersTableLukas.Arn}/index/${file(./env.yml):Index_Name}'
 
   # Authorizer Functions
-  authorizerFunc:
+  tokenAuthorizer:
     handler: authorizer/tokenAuthorizer.authorizer
     iamRoleStatements:
       - Effect: "Allow"
@@ -215,3 +219,4 @@ resources: # CloudFormation template syntax from here on.
 
 plugins:
   - serverless-iam-roles-per-function
+  - serverless-offline

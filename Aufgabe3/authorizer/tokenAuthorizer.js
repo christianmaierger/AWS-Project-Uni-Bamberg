@@ -62,12 +62,10 @@ module.exports.authorizer = async (event, context, callback) => {
                 .promise();
 
             const resultList = response.Items;
-            console.log(resultList);
             if (resultList.length > 0) {
                 item = resultList[0];
-                console.log(item);
-                policy.allowMethod(AuthPolicy.HttpVerb.GET, "/user/*");
                 policy.allowMethod(AuthPolicy.HttpVerb.GET, "/user");
+                policy.allowMethod(AuthPolicy.HttpVerb.ALL, "/user/*");
             } else {
                 policy.denyAllMethods();
             }

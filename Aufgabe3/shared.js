@@ -88,7 +88,7 @@ function createPrioFromBirthday(birthday) {
     if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
         age--;
     }
-    if (age < 18){
+    if (age < 18) {
         prio = -1;
     }
     if (age >= 18 && age < 40) {
@@ -125,7 +125,8 @@ const errorType = {
     badName: "badName",
     badPassword: "badPassword",
     badPreDiseases: "badPreDiseases",
-    badSystemRelevance:"badSystemRelevance",
+    badSystemRelevance: "badSystemRelevance",
+    notAllNecessaryInformation: "notAllNecessaryInformation",
 };
 
 function handleError(err) {
@@ -170,6 +171,22 @@ function handleError(err) {
             return wrapResponse(400, {
                 message:
                     "Name is not formatted correctly.",
+            });
+
+        case errorType.badSystemRelevance:
+            return wrapResponse(400, {
+                message:
+                    "System Relevance is not formatted correctly.",
+            });
+        case errorType.badPreDiseases:
+            return wrapResponse(400, {
+                message:
+                    "Pre Diseases is not formatted correctly.",
+            });
+        case errorType.notAllNecessaryInformation:
+            return wrapResponse(400, {
+                message:
+                    "Not all necessary information are provided. Please ensure that pre_diseases and system_relevance is listed.",
             });
         default:
             return wrapResponse(418, {
