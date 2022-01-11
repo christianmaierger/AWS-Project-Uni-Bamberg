@@ -13,7 +13,7 @@ const {
     validateItemExists, validateItem,
 } = require('../validator');
 
-function hasAllNeededNecessaryAttributes(itemChanges, item){
+function hasAllNeededNecessaryAttributes(itemChanges, item) {
     const necessaryAttributes = ["system_relevance", "pre_diseases"];
 
     const itemChangesKeys = Object.keys(itemChanges);
@@ -31,7 +31,7 @@ function hasAllNeededNecessaryAttributes(itemChanges, item){
 }
 
 async function updateItem(itemChanges, item) {
-    if (!hasAllNeededNecessaryAttributes(itemChanges, item)){
+    if (!hasAllNeededNecessaryAttributes(itemChanges, item)) {
         throw errorType.notAllNecessaryInformation;
     }
 
@@ -43,7 +43,7 @@ async function updateItem(itemChanges, item) {
     delete itemChanges.birthday;
     delete itemChanges.token;
 
-    if (Object.keys(itemChanges).length === 0){
+    if (Object.keys(itemChanges).length === 0) {
         return;
     }
 
