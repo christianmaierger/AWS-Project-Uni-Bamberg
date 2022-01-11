@@ -27,6 +27,27 @@ function wrapParams(key, data, tableName = TableName) {
     return params;
 }
 
+function wrapDeleteParams(itemAttributes, item, tableName = TableName){
+    let deleteExpression = 'remove';
+
+    for (let attribute of itemAttributes) {
+        if (attribute !== 'email' && attribute !== 'birthday') {
+            deleteExpression += ` ${attribute},`;
+        }
+    }
+
+    deleteExpression = deleteExpression.slice(0, -1);
+
+    const email = item.email;
+    const birthday = item.birthday;
+
+    let params = wrapParams('Key', {email, birthday}, tableName);
+    params.UpdateExpression = deleteExpression;
+    params.ReturnValues = 'UPDATED_NEW';
+
+    return params;
+}
+
 function wrapUpdateParams(item, tableName = TableName) {
     const itemKeys = Object.keys(item);
 
@@ -209,6 +230,7 @@ module.exports = {
     wrapResponse,
     wrapParams,
     wrapUpdateParams,
+    wrapDeleteParams,
     TokenIndexName,
     handleError,
     TableName,

@@ -138,6 +138,17 @@ functions:
             type: request
             name: authorizerLogin
 
+  userLogout:
+    handler: handler/logout.logout
+    events:
+      - http:
+          path: ${file(./env.yml):UserLogoutPath}
+          method: get
+          authorizer:
+            identitySource: method.request.header.token
+            type: token
+            name: tokenAuthorizer
+
   # Admin Functions
   listUsersByPlz:
     handler: handler/listUsersByPlz.listUsersByPlz
