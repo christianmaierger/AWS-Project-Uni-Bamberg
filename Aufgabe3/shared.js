@@ -58,6 +58,7 @@ function wrapUpdateParams(item, tableName = TableName) {
     return params;
 }
 
+// TODO doesn't work currently, need update to new version with token etc.
 async function isAlreadyExisting(email, birthday) {
     const item = {item: {email: email, birthday: birthday}};
 

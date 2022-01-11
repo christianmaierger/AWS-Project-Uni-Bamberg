@@ -128,6 +128,13 @@ function validateItem(item) {
                 break;
             case "prio":
                 validatePrio(element);
+                break;
+            case "system_relevance":
+                validateSystemRelevance(element);
+                break;
+            case "pre_diseases":
+                validatePreDisease(element);
+                break;
         }
     }
 }
