@@ -1,5 +1,6 @@
 // Load the AWS SDK for Node.js
 const AWS = require("aws-sdk");
+const crypto = require("crypto");
 // Create DynamoDB document client
 const docClient = new AWS.DynamoDB.DocumentClient({apiVersion: "2012-08-10"});
 
@@ -14,8 +15,9 @@ function isEmpty(obj) {
 
 function wrapResponse(statusCode, data) {
     return {
+        isBase64Encoded: false,
         statusCode: statusCode,
-        body: data,
+        body: JSON.stringify(data),
     };
 }
 
@@ -86,7 +88,10 @@ function createPrioFromBirthday(birthday) {
     if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
         age--;
     }
-    if (age < 40) {
+    if (age < 18){
+        prio = -1;
+    }
+    if (age >= 18 && age < 40) {
         prio = 3;
     }
     if (age >= 40 && age < 60) {
@@ -101,6 +106,13 @@ function createPrioFromBirthday(birthday) {
     return prio;
 }
 
+function hashPassword(clear_password) {
+    return crypto
+        .createHash("sha256")
+        .update(clear_password)
+        .digest("base64");
+}
+
 const errorType = {
     badEmail: "badEmail",
     badBirthday: "badBirthday",
@@ -110,14 +122,17 @@ const errorType = {
     idexists: "idexists",
     badGender: "badGender",
     badPrio: "badPrio",
-    badName: "badName"
+    badName: "badName",
+    badPassword: "badPassword",
+    badPreDiseases: "badPreDiseases",
+    badSystemRelevance:"badSystemRelevance",
 };
 
 function handleError(err) {
     switch (err) {
         case errorType.badEmail:
             return wrapResponse(400, {
-                message: "Bad Request: Email is not valid",
+                message: "Bad Request: Email is not valid.",
             });
         case errorType.badBirthday:
             return wrapResponse(400, {
@@ -125,30 +140,30 @@ function handleError(err) {
             });
         case errorType.badPlz:
             return wrapResponse(400, {
-                message: "Bad Request: PLZ is not valid",
+                message: "Bad Request: PLZ is invalid.",
             });
         case errorType.badGender:
             return wrapResponse(400, {
-                message: "Bad Request: Gender is not valid",
+                message: "Bad Request: Gender is invalid",
             });
         case errorType.badPrio:
             return wrapResponse(400, {
-                message: "Bad Request: Prio is not valid",
+                message: "Bad Request: Priority is invalid",
             });
         case errorType.idnotexists:
             return wrapResponse(404, {
-                message: "There is no entry for the given data",
+                message: "There is no entry for the given data.",
             });
 
         case errorType.dberror:
             return wrapResponse(500, {
-                message: "There was a Problem checking the Database",
+                message: "There was a problem checking the database.",
             });
 
         case errorType.idexists:
             return wrapResponse(405, {
                 message:
-                    "Entry with given ID already exists, please use update to overide an existing entry",
+                    "Entry with given ID already exists, please use update to override an existing entry.",
             });
 
         case errorType.badName:
@@ -167,6 +182,7 @@ function handleError(err) {
 const TableName = process.env.Table_Name;
 const GetFunction = process.env.Get_Function;
 const GSIName = process.env.GSI_Name;
+const TokenIndexName = process.env.Token_Index_Name;
 
 module.exports = {
     docClient,
@@ -175,11 +191,13 @@ module.exports = {
     wrapResponse,
     wrapParams,
     wrapUpdateParams,
+    TokenIndexName,
     handleError,
     TableName,
     GSIName,
     GetFunction,
     errorType,
     isAlreadyExisting,
-    createPrioFromBirthday
+    createPrioFromBirthday,
+    hashPassword
 };

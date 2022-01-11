@@ -7,7 +7,7 @@ const {
     wrapParams,
     handleError,
     errorType,
-    createPrioFromBirthday,
+    createPrioFromBirthday, hashPassword,
 } = require('../shared');
 
 const {
@@ -16,7 +16,7 @@ const {
     validateBirthday,
     validateGender,
     validateItemNotExists,
-    validateName,
+    validateName, validatePreDisease, validateSystemRelevance, validatePassword,
 } = require('../validator');
 
 async function putItemToDatabase(item) {
@@ -35,6 +35,14 @@ async function createItem(item) {
     validateGender(item.gender);
     validateBirthday(item.birthday);
     validateName(item.name);
+    validatePreDisease(item.pre_diseases)
+    validateSystemRelevance(item.system_relevance);
+    validatePassword(item.password);
+
+    if (item.token !== undefined) {
+        delete item.token;
+    }
+    item.password = hashPassword(item.password);
 
     item.prio = createPrioFromBirthday(item.birthday);
 
@@ -44,8 +52,9 @@ async function createItem(item) {
 }
 
 module.exports.create = async (event) => {
+    const item = JSON.parse(event.body).item;
     try {
-        await createItem(event.item);
+        await createItem(item);
         return wrapResponse(200, {message: 'Creation of entry successful'});
     } catch (err) {
         return handleError(err);

@@ -29,7 +29,19 @@ function isGenderValid(gender) {
 }
 
 function isPrioValid(prio) {
-    return (prio === 1 || prio === 2 || prio === 3);
+    return (prio === 1 || prio === 2 || prio === 3 || prio === -1);
+}
+
+function isSystemRelevanceValid(system_relevance) {
+    return system_relevance !== undefined;
+}
+
+function isPreDiseaseValid(pre_disease) {
+    return pre_disease !== undefined;
+}
+
+function isValidPassword(password){
+    return password !== undefined && password.length >= 8;
 }
 
 function validateEmail(email) {
@@ -62,6 +74,24 @@ function validatePrio(prio) {
     }
 }
 
+function validateSystemRelevance(system_relevance) {
+    if (!isSystemRelevanceValid(system_relevance)) {
+        throw errorType.badSystemRelevance;
+    }
+}
+
+function validatePreDisease(pre_disease) {
+    if (!isPreDiseaseValid(pre_disease)) {
+        throw errorType.badPreDiseases;
+    }
+}
+
+function validatePassword(password){
+    if (!isValidPassword(password)){
+        throw errorType.badPassword;
+    }
+}
+
 function validateName(name) {
     if (!name || name === {}) {
         throw errorType.badName;
@@ -80,11 +110,11 @@ function validateName(name) {
     }
 }
 
-function validateItem(item){
+function validateItem(item) {
     validateEmail(item.email);
     validateBirthday(item.birthday);
 
-    for (let key of Object.keys(item)){
+    for (let key of Object.keys(item)) {
         const element = item[key];
         switch (key) {
             case "plz":
@@ -122,6 +152,9 @@ module.exports = {
     validateBirthday,
     validateGender,
     validatePrio,
+    validateSystemRelevance,
+    validatePreDisease,
+    validatePassword,
     validateName,
     validateItemExists,
     validateItemNotExists,
