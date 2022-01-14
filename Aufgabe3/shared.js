@@ -93,7 +93,7 @@ function createPrioFromBirthday(birthday, illOrRelevant) {
     if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
         age--;
     }
-    if (age < 40) {
+    if (age <= 18 && age < 40) {
         prio = 3;
     }
     if (age >= 40 && age < 60) {

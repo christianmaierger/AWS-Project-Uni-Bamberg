@@ -29,7 +29,8 @@ function isGenderValid(gender) {
 }
 
 function isPrioValid(prio) {
-    return (prio === 1 || prio === 2 || prio === 3);
+    // todo undefined sein lassen oder rauswerfen
+    return (!prio || prio===undefined || prio === 1 || prio === 2 || prio === 3);
 }
 
 function validateEmail(email) {
@@ -114,6 +115,7 @@ function validateItem(item){
                 validateGender(element);
                 break;
             case "prio":
+                // todo wenns auch undefined sein kann, einfach validation rauswerfen?
                 validatePrio(element);
                 // todo wird etwa bei update aufgerufen, neues item sollte ja auch rel und illness enthalten
                 break;
