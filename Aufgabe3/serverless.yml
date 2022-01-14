@@ -199,6 +199,32 @@ functions:
             claims:
               - email
 
+  updateUsersByPlz:
+    handler: handler/admin/updateUsersByPlz.updateUsersByPlz
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - dynamodb:GetItem
+          - dynamodb:Query
+          - dynamodb:PutItem
+          - dynamodb:UpdateItem
+        Resource:
+          - "Fn::GetAtt": [ UsersTableLukas, Arn ]
+          - !Sub '${UsersTableLukas.Arn}/index/${file(./env.yml):Index_Name}'
+    events:
+      - http:
+          path: ${file(./env.yml):AdminUpdateUsersByPlzPath}
+          method: post
+          authorizer:
+            name: PrivateAuthorizer
+            type: COGNITO_USER_POOLS
+            arn:
+              Fn::GetAtt:
+                - UserPool
+                - Arn
+            claims:
+              - email
+
   listUsersByPlz:
     handler: handler/listUsersByPlz.listUsersByPlz
     iamRoleStatements:
