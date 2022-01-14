@@ -16,7 +16,7 @@ const {createPriority, wrapUpdateParams} = require("../../shared");
 async function getUsers(plz, n) {
     validatePlz(plz);
 
-    if (n === 0) {
+    if (n <= 0) {
         return [];
     }
 
@@ -31,7 +31,6 @@ async function getUsers(plz, n) {
                     ':plz': plz,
                 },
                 ScanIndexForward: true, // this determines if sorted ascending or descending by range key
-                //FilterExpression: 'prio = :prio',
             })
             .promise();
     } catch (error) {
@@ -70,8 +69,7 @@ async function updateUsers(plz, n) {
         promises.push(docClient.update(params).promise());
     }
 
-    await Promise.all(promises).catch((error) => {
-        console.log(error);
+    await Promise.all(promises).catch(() => {
         throw errorType.dberror;
     });
 
@@ -81,6 +79,8 @@ async function updateUsers(plz, n) {
 module.exports.updateUsersByPlz = async (event) => {
     const body = JSON.parse(event.body);
     const {plz, n} = body;
+
+    // TODO add validation
 
     try {
         const response = await updateUsers(plz, n);
