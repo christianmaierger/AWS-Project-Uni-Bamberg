@@ -80,6 +80,23 @@ function validateName(name) {
     }
 }
 
+function validateprevIllness(illness) {
+    // Krankheiten können auch Zahlen enthalten, besonders berücksichtigt wird laut WDR mit Quelle RKI Trisomie 21
+    // todo match jetzt halt auf String_StringZahl
+    const regex = /^([a-zA-Z]+\s)*[a-zA-Z]*[0-9]*$/;
+
+    if (!illness.match(regex)) {
+        throw errorType.badIllness;
+    }
+}
+
+function validateSystemRelevant(relevance) {
+    if(relevance !== true || relevance !== false) {
+        throw errorType.badRelevance;
+    }
+}
+
+
 function validateItem(item){
     validateEmail(item.email);
     validateBirthday(item.birthday);
@@ -98,6 +115,14 @@ function validateItem(item){
                 break;
             case "prio":
                 validatePrio(element);
+            // todo wird etwa bei update aufgerufen, neues item sollte ja auch rel und illness enthalten
+                break;
+            case "illness":
+                validateprevIllness(illness);
+                break;
+            case "relevance":
+                validateSystemRelevant(relevance);
+                break;
         }
     }
 }
@@ -125,5 +150,7 @@ module.exports = {
     validateName,
     validateItemExists,
     validateItemNotExists,
-    validateItem
+    validateItem,
+    validateprevIllness,
+    validateSystemRelevant
 };

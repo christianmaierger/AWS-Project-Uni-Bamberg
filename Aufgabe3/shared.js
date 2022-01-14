@@ -75,7 +75,14 @@ async function isAlreadyExisting(email, birthday) {
     }
 }
 
-function createPrioFromBirthday(birthday) {
+function isIllOrRelevant(illness, relevance) {
+    if (illness || (relevance && relevance === true)) {
+        return true;
+    }
+    return false;
+}
+
+function createPrioFromBirthday(birthday, illOrRelevant) {
     let prio;
 
     let today = new Date();
@@ -98,6 +105,12 @@ function createPrioFromBirthday(birthday) {
     if (age >= 140) {
         throw errorType.badBirthday
     }
+
+    // change in prio: if relevant and/or prevIllness then at least prio 2
+    if(prio===1 && illOrRelevant=== true) {
+        prio =2;
+    }
+
     return prio;
 }
 
@@ -110,7 +123,9 @@ const errorType = {
     idexists: "idexists",
     badGender: "badGender",
     badPrio: "badPrio",
-    badName: "badName"
+    badName: "badName",
+    badIllness: "badIllness",
+    badRelevance: "badRelevance"
 };
 
 function handleError(err) {
@@ -156,6 +171,16 @@ function handleError(err) {
                 message:
                     "Name is not formatted correctly.",
             });
+        case errorType.badIllness:
+            return wrapResponse(400, {
+                message:
+                    "Illness is not formatted correctly.",
+            });
+        case errorType.badRelevance:
+            return wrapResponse(400, {
+                message:
+                    "Relevance is not formatted correctly.",
+            });
         default:
             return wrapResponse(418, {
                 message: "Unknown error thrown: " + err,
@@ -181,5 +206,6 @@ module.exports = {
     GetFunction,
     errorType,
     isAlreadyExisting,
-    createPrioFromBirthday
+    createPrioFromBirthday,
+    isIllOrRelevant
 };

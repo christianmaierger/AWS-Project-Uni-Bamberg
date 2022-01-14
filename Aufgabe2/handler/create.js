@@ -17,6 +17,8 @@ const {
     validateGender,
     validateItemNotExists,
     validateName,
+    validateprevIllness,
+    validateSystemRelevant
 } = require('../validator');
 
 async function putItemToDatabase(item) {
@@ -35,6 +37,8 @@ async function createItem(item) {
     validateGender(item.gender);
     validateBirthday(item.birthday);
     validateName(item.name);
+    validateprevIllness(item.illness);
+    validateSystemRelevant(item.relevance)
 
     item.prio = createPrioFromBirthday(item.birthday);
 

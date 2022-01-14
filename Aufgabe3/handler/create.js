@@ -17,6 +17,9 @@ const {
     validateGender,
     validateItemNotExists,
     validateName,
+    validateprevIllness,
+    validateSystemRelevant,
+    isIllOrRelevant
 } = require('../validator');
 
 async function putItemToDatabase(item) {
@@ -29,14 +32,18 @@ async function putItemToDatabase(item) {
     }
 }
 
+
 async function createItem(item) {
     validateEmail(item.email);
     validatePlz(item.plz);
     validateGender(item.gender);
     validateBirthday(item.birthday);
     validateName(item.name);
+    validateprevIllness(item.illness);
+    validateSystemRelevant(item.relevance)
 
-    item.prio = createPrioFromBirthday(item.birthday);
+    const illOrRelevant = isIllOrRelevant(item.illness, item.relevance);
+    item.prio = createPrioFromBirthday(item.birthday, illOrRelevant);
 
     await validateItemNotExists(item.email, item.birthday);
 

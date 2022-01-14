@@ -110,7 +110,9 @@ const errorType = {
     idexists: "idexists",
     badGender: "badGender",
     badPrio: "badPrio",
-    badName: "badName"
+    badName: "badName",
+    badIllness: "badIllness",
+    badRelevance: "badRelevance"
 };
 
 function handleError(err) {
@@ -155,6 +157,16 @@ function handleError(err) {
             return wrapResponse(400, {
                 message:
                     "Name is not formatted correctly.",
+            });
+        case errorType.badIllness:
+            return wrapResponse(400, {
+                message:
+                    "Illness is not formatted correctly.",
+            });
+        case errorType.badRelevance:
+            return wrapResponse(400, {
+                message:
+                    "Relevance is not formatted correctly.",
             });
         default:
             return wrapResponse(418, {

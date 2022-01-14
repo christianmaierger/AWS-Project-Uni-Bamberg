@@ -7,15 +7,14 @@ const {
     wrapParams,
     handleError,
     errorType,
-    createPrioFromBirthday, wrapUpdateParams,
+    createPrioFromBirthday,
+    wrapUpdateParams,
+    isIllOrRelevant
 } = require('../shared');
 
 const {
-    validateEmail,
     validateItemExists,
-    validatePlz,
-    validateBirthday,
-    validateGender, validateItem,
+    validateItem,
 } = require('../validator');
 
 async function updateItem(item) {
@@ -26,8 +25,9 @@ async function updateItem(item) {
 
     await validateItemExists(email, birthday);
 
-    // new prio is created
-    item.prio = createPrioFromBirthday(birthday);
+    const illOrRelevant = isIllOrRelevant(item.illness, item.relevance);
+    item.prio = createPrioFromBirthday(item.birthday, illOrRelevant);
+
 
     const params = wrapUpdateParams(item);
     try {

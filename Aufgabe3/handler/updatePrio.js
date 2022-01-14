@@ -7,7 +7,9 @@ const {
     wrapParams,
     handleError,
     errorType,
-    createPrioFromBirthday, wrapUpdateParams,
+    createPrioFromBirthday,
+    wrapUpdateParams,
+    isIllOrRelevant
 } = require("../shared");
 
 const {
@@ -25,8 +27,8 @@ async function updatePrio(item) {
     // check if an item can be found under given id
     await validateItemExists(email, birthday);
 
-    // new prio is created
-    item.prio = createPrioFromBirthday(item.birthday);
+    const illOrRelevant = isIllOrRelevant(item.illness, item.relevance);
+    item.prio = createPrioFromBirthday(item.birthday, illOrRelevant);
 
     //const params = wrapParams("Key", item);
     const params = wrapUpdateParams(item);

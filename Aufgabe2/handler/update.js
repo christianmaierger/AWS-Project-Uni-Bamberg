@@ -11,11 +11,8 @@ const {
 } = require('../shared');
 
 const {
-    validateEmail,
     validateItemExists,
-    validatePlz,
-    validateBirthday,
-    validateGender, validateItem,
+    validateItem,
 } = require('../validator');
 
 async function updateItem(item) {
