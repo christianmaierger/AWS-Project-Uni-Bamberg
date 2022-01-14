@@ -7,7 +7,7 @@ const {
     wrapParams,
     handleError,
     errorType,
-    createPrioFromBirthday, hashPassword,
+    hashPassword, createPriority,
 } = require('../shared');
 
 const {
@@ -44,7 +44,7 @@ async function createItem(item) {
     }
     item.password = hashPassword(item.password);
 
-    item.prio = createPrioFromBirthday(item.birthday);
+    item.prio = createPriority(item.birthday, item.system_relevance, item.pre_diseases);
 
     await validateItemNotExists(item.email, item.birthday);
 

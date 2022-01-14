@@ -27,7 +27,7 @@ function wrapParams(key, data, tableName = TableName) {
     return params;
 }
 
-function wrapDeleteParams(itemAttributes, item, tableName = TableName){
+function wrapDeleteParams(itemAttributes, item, tableName = TableName) {
     let deleteExpression = 'remove';
 
     for (let attribute of itemAttributes) {
@@ -125,6 +125,17 @@ function createPrioFromBirthday(birthday) {
     if (age >= 140) {
         throw errorType.badBirthday
     }
+    return prio;
+}
+
+function createPriority(birthday, system_relevance, pre_diseases) {
+    let prio = createPrioFromBirthday(birthday);
+    if (system_relevance === true || pre_diseases === true) {
+        if (prio > 2) {
+            prio = 2;
+        }
+    }
+
     return prio;
 }
 
@@ -238,6 +249,6 @@ module.exports = {
     GetFunction,
     errorType,
     isAlreadyExisting,
-    createPrioFromBirthday,
+    createPriority,
     hashPassword
 };

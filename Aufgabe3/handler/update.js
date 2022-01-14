@@ -6,7 +6,7 @@ const {
     wrapResponse,
     handleError,
     errorType,
-    createPrioFromBirthday, wrapUpdateParams, hashPassword,
+    wrapUpdateParams, hashPassword, createPriority,
 } = require('../shared');
 
 const {
@@ -56,7 +56,7 @@ async function updateItem(itemChanges, item) {
         updateItemBundle[key] = value;
     }
 
-    updateItemBundle.prio = createPrioFromBirthday(item.birthday);
+    updateItemBundle.prio = createPriority(item.birthday, item.system_relevance, item.pre_diseases);
 
     await validateItem(updateItemBundle);
 

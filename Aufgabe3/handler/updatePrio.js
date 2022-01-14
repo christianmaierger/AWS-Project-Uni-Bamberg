@@ -6,14 +6,14 @@ const {
     wrapResponse,
     handleError,
     errorType,
-    createPrioFromBirthday, wrapUpdateParams,
+     wrapUpdateParams, createPriority,
 } = require("../shared");
 
 async function updatePrio(item) {
     const updateItemBundle = {};
     updateItemBundle.email = item.email;
     updateItemBundle.birthday = item.birthday;
-    updateItemBundle.prio = createPrioFromBirthday(item.birthday);
+    updateItemBundle.prio = createPriority(item.birthday, item.system_relevance, item.pre_diseases);
 
     const params = wrapUpdateParams(updateItemBundle);
     try {
