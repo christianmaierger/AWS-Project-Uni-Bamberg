@@ -183,6 +183,22 @@ functions:
             claims:
               - email
 
+  registerAdmin:
+    handler: handler/admin/register.register
+    events:
+      - http:
+          path: ${file(./env.yml):AdminRegisterPath}
+          method: post
+          authorizer:
+            name: PrivateAuthorizer
+            type: COGNITO_USER_POOLS
+            arn:
+              Fn::GetAtt:
+                - UserPool
+                - Arn
+            claims:
+              - email
+
   listUsersByPlz:
     handler: handler/listUsersByPlz.listUsersByPlz
     iamRoleStatements:
