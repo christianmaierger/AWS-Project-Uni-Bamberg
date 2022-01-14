@@ -8,6 +8,7 @@ const {
     handleError,
     errorType,
     createPrioFromBirthday,
+    isIllOrRelevant
 } = require('../shared');
 
 const {
@@ -19,7 +20,6 @@ const {
     validateName,
     validateprevIllness,
     validateSystemRelevant,
-    isIllOrRelevant
 } = require('../validator');
 
 async function putItemToDatabase(item) {

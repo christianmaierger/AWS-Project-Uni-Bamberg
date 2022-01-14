@@ -76,7 +76,8 @@ async function isAlreadyExisting(email, birthday) {
 }
 
 function isIllOrRelevant(illness, relevance) {
-    if (illness || (relevance && relevance === true)) {
+    // true is a string here not a boolean when items gets to DB!!!
+    if (illness || (relevance && relevance === "true")) {
         return true;
     }
     return false;
@@ -93,7 +94,7 @@ function createPrioFromBirthday(birthday, illOrRelevant) {
     if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
         age--;
     }
-    if (age <= 18 && age < 40) {
+    if (age >= 18 && age < 40) {
         prio = 3;
     }
     if (age >= 40 && age < 60) {
@@ -107,7 +108,7 @@ function createPrioFromBirthday(birthday, illOrRelevant) {
     }
 
     // change in prio: if relevant and/or prevIllness then at least prio 2
-    if(prio===1 && illOrRelevant=== true) {
+    if(prio===3 && illOrRelevant=== true) {
         prio =2;
     }
 

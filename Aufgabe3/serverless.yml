@@ -1,144 +1,163 @@
-service: task2
+service: task3-chris
 
 frameworkVersion: "2"
 
 provider:
-    name: aws
-    runtime: nodejs12.x
-    lambdaHashingVersion: 20201221
-    region: eu-central-1
-    environment:
-        Table_Name: ${file(./env.yml):Table_Name}
-        GSI_Name: ${file(./env.yml):Index_Name}
-        Partition_Key: ${file(./env.yml):Partition_Key} #email
-        Sort_Key: ${file(./env.yml):Sort_Key} #birthday
-        Get_Function: ${self:functions.read.name}
+  name: aws
+  runtime: nodejs12.x
+  lambdaHashingVersion: 20201221
+  region: eu-central-1
+  environment:
+    Table_Name: ${file(./env.yml):Table_Name}
+    GSI_Name: ${file(./env.yml):Index_Name}
+    Partition_Key: ${file(./env.yml):Partition_Key} #email
+    Sort_Key: ${file(./env.yml):Sort_Key} #birthday
+    Get_Function: ${self:functions.read.name}
 
 package:
-    exclude:
-        - node_modules/**
-        - package.json
-        - package-lock.json
-        - data/**
+  exclude:
+    - node_modules/**
+    - package.json
+    - package-lock.json
+    - data/**
 
 functions:
-    logItemChanges:
-        handler: handler/logItemChanges.logItemChanges
-        events:
-            - stream:
-                  type: dynamodb
-                  arn:
-                      Fn::GetAtt: [UsersTable, StreamArn]
-        iamRoleStatements:
-            - Effect: "Allow"
-              Action:
-                  - dynamodb:DescribeStream
-                  - dynamodb:GetRecords
-                  - dynamodb:GetShardIterator
-                  - dynamodb:ListStreams
-              Resource:
-                  - "Fn::GetAtt": [UsersTable, Arn]
-    read:
-        handler: handler/read.read
-        name: ${self:service}-${sls:stage}-read
-        iamRoleStatements:
-            - Effect: "Allow"
-              Action:
-                  - dynamodb:GetItem
-              Resource:
-                  - "Fn::GetAtt": [UsersTable, Arn]
-    listUsersByPlz:
-      handler: handler/listUsersByPlz.listUsersByPlz
-      iamRoleStatements:
-        - Effect: "Allow"
-          Action:
-            - dynamodb:GetItem
-            - dynamodb:Query
-          Resource:
-            - !Sub '${UsersTable.Arn}/index/${file(./env.yml):Index_Name}'
-    create:
-        handler: handler/create.create
-        iamRoleStatements:
-            - Effect: "Allow"
-              Action:
-                  - dynamodb:PutItem
-              Resource:
-                  - "Fn::GetAtt": [UsersTable, Arn]
-            - Effect: "Allow"
-              Action:
-                  - lambda:InvokeFunction
-              Resource:
-                  - !GetAtt ReadLambdaFunction.Arn # shortcut to get arn, yaml syntax
-    update:
-        handler: handler/update.update
-        iamRoleStatements:
-            - Effect: "Allow"
-              Action:
-                  - dynamodb:PutItem
-              Resource:
-                  - "Fn::GetAtt": [UsersTable, Arn]
-            - Effect: "Allow"
-              Action:
-                  - lambda:InvokeFunction
-              Resource:
-                  - !GetAtt ReadLambdaFunction.Arn # shortcut to get arn, yaml syntax
-    updatePrio:
-      handler: handler/updatePrio.updatePrio
-      iamRoleStatements:
-        - Effect: "Allow"
-          Action:
-            - dynamodb:PutItem
-          Resource:
-            - "Fn::GetAtt": [ UsersTable, Arn ]
-        - Effect: "Allow"
-          Action:
-            - lambda:InvokeFunction
-          Resource:
-            - !GetAtt ReadLambdaFunction.Arn # shortcut to get arn, yaml syntax
-    delete:
-        handler: handler/delete.delete
-        iamRoleStatements:
-            - Effect: "Allow"
-              Action:
-                  - dynamodb:DeleteItem
-              Resource:
-                  - "Fn::GetAtt": [UsersTable, Arn] # longer way to get the arn JSON like
-            - Effect: "Allow"
-              Action:
-                  - lambda:InvokeFunction
-              Resource:
-                  - !GetAtt ReadLambdaFunction.Arn # shortcut to get arn, yaml syntax
+  logItemChanges:
+    handler: handler/logItemChanges.logItemChanges
+    events:
+      - stream:
+          type: dynamodb
+          arn:
+            Fn::GetAtt: [UsersTable, StreamArn]
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - dynamodb:DescribeStream
+          - dynamodb:GetRecords
+          - dynamodb:GetShardIterator
+          - dynamodb:ListStreams
+        Resource:
+          - "Fn::GetAtt": [UsersTable, Arn]
+  read:
+    handler: handler/read.read
+    name: ${self:service}-${sls:stage}-read
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - dynamodb:GetItem
+        Resource:
+          - "Fn::GetAtt": [UsersTable, Arn]
+  listUsersByPlz:
+    handler: handler/listUsersByPlz.listUsersByPlz
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - dynamodb:GetItem
+          - dynamodb:Query
+        Resource:
+          - !Sub '${UsersTable.Arn}/index/${file(./env.yml):Index_Name}'
+  create:
+    handler: handler/create.create
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - dynamodb:PutItem
+        Resource:
+          - "Fn::GetAtt": [UsersTable, Arn]
+      - Effect: "Allow"
+        Action:
+          - lambda:InvokeFunction
+        Resource:
+          - !GetAtt ReadLambdaFunction.Arn # shortcut to get arn, yaml syntax
+  update:
+    handler: handler/update.update
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - dynamodb:PutItem
+        Resource:
+          - "Fn::GetAtt": [UsersTable, Arn]
+      - Effect: "Allow"
+        Action:
+          - lambda:InvokeFunction
+        Resource:
+          - !GetAtt ReadLambdaFunction.Arn # shortcut to get arn, yaml syntax
+  updatePrio:
+    handler: handler/updatePrio.updatePrio
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - dynamodb:PutItem #does that really work uses update method like update by plz UpdateItem needed there
+        Resource:
+          - "Fn::GetAtt": [ UsersTable, Arn ]
+      - Effect: "Allow"
+        Action:
+          - lambda:InvokeFunction
+        Resource:
+          - !GetAtt ReadLambdaFunction.Arn # shortcut to get arn, yaml syntax
+  updatePriosByPlz:
+    handler: handler/updatePriosByPlz.updatePriosByPlz
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - dynamodb:UpdateItem
+        Resource:
+          - "Fn::GetAtt": [ UsersTable, Arn ]
+      - Effect: "Allow"
+        Action:
+          - lambda:InvokeFunction
+        Resource:
+          - !GetAtt ReadLambdaFunction.Arn # shortcut to get arn, yaml syntax
+      - Effect: "Allow"
+        Action:
+          - dynamodb:GetItem
+          - dynamodb:Query
+        Resource:
+          - !Sub '${UsersTable.Arn}/index/${file(./env.yml):Index_Name}'
+  delete:
+    handler: handler/delete.delete
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - dynamodb:DeleteItem
+        Resource:
+          - "Fn::GetAtt": [UsersTable, Arn] # longer way to get the arn JSON like
+      - Effect: "Allow"
+        Action:
+          - lambda:InvokeFunction
+        Resource:
+          - !GetAtt ReadLambdaFunction.Arn # shortcut to get arn, yaml syntax
 
 resources: # CloudFormation template syntax from here on.
-    Resources:
-        UsersTable: #must be same as TableName
-            Type: AWS::DynamoDB::Table
-            Properties:
-                TableName: ${file(./env.yml):Table_Name}
-                AttributeDefinitions:
-                    - AttributeName: ${file(./env.yml):Partition_Key}   # email
-                      AttributeType: S # S = String, N would be for Number
-                    - AttributeName: ${file(./env.yml):Sort_Key} # Birthday as number for better filtering with key expression
-                      AttributeType: S # N for number, must be parsed from user inputed String in ISO 8601 format!!!
-                    - AttributeName: ${file(./env.yml):Partition_Key2} # Plz
-                      AttributeType: S # S = String, N would be for Number
-                KeySchema:
-                    - AttributeName: ${file(./env.yml):Partition_Key}
-                      KeyType: HASH # primary key
-                    - AttributeName: ${file(./env.yml):Sort_Key}
-                      KeyType: RANGE # sort key
-                StreamSpecification:
-                  StreamViewType: NEW_IMAGE
-                BillingMode: PAY_PER_REQUEST
-                GlobalSecondaryIndexes:
-                  - IndexName: ${file(./env.yml):Index_Name}
-                    KeySchema:
-                      - AttributeName: ${file(./env.yml):Partition_Key2} # Plz
-                        KeyType: "HASH"
-                      - AttributeName: ${file(./env.yml):Sort_Key} # Birthday
-                        KeyType: "RANGE"
-                    Projection:
-                      ProjectionType: "ALL"
+  Resources:
+    UsersTable: #must be same as TableName
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${file(./env.yml):Table_Name}
+        AttributeDefinitions:
+          - AttributeName: ${file(./env.yml):Partition_Key}   # email
+            AttributeType: S # S = String, N would be for Number
+          - AttributeName: ${file(./env.yml):Sort_Key} # Birthday as number for better filtering with key expression
+            AttributeType: S # N for number, must be parsed from user inputed String in ISO 8601 format!!!
+          - AttributeName: ${file(./env.yml):Partition_Key2} # Plz
+            AttributeType: S # S = String, N would be for Number
+        KeySchema:
+          - AttributeName: ${file(./env.yml):Partition_Key}
+            KeyType: HASH # primary key
+          - AttributeName: ${file(./env.yml):Sort_Key}
+            KeyType: RANGE # sort key
+        StreamSpecification:
+          StreamViewType: NEW_IMAGE
+        BillingMode: PAY_PER_REQUEST
+        GlobalSecondaryIndexes:
+          - IndexName: ${file(./env.yml):Index_Name}
+            KeySchema:
+              - AttributeName: ${file(./env.yml):Partition_Key2} # Plz
+                KeyType: "HASH"
+              - AttributeName: ${file(./env.yml):Sort_Key} # Birthday
+                KeyType: "RANGE"
+            Projection:
+              ProjectionType: "ALL"
 
 plugins:
-    - serverless-iam-roles-per-function
+  - serverless-iam-roles-per-function

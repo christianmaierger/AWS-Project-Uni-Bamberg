@@ -16,6 +16,8 @@ const {
     validateEmail,
     validateItemExists,
     validateBirthday,
+    validateprevIllness,
+    validateSystemRelevant,
 } = require('../validator');
 
 async function updatePrio(item) {
@@ -24,6 +26,9 @@ async function updatePrio(item) {
     // possibly not necessary as update should be done automatically
     validateEmail(email)
     validateBirthday(birthday)
+    validateprevIllness(item.illness);
+    validateSystemRelevant(item.relevance)
+
     // check if an item can be found under given id
     await validateItemExists(email, birthday);
 

@@ -86,17 +86,27 @@ function validateprevIllness(illness) {
     // todo match jetzt halt auf String_StringZahl
     const regex = /^([a-zA-Z]+\s)*[a-zA-Z]*[0-9]*$/;
 
-    if (!illness.match(regex)) {
-        throw errorType.badIllness;
+    if (illness) {
+        if (!illness.match(regex)) {
+            throw errorType.badIllness;
+        }
     }
 }
 
 function validateSystemRelevant(relevance) {
-    if(relevance !== true || relevance !== false) {
-        throw errorType.badRelevance;
+    if (relevance) {
+        if (relevance !== true || relevance !== false) {
+            throw errorType.badRelevance;
+        }
     }
 }
 
+function isIllOrRelevant(illness, relevance) {
+    if (illness || (relevance && relevance === true)) {
+        return true;
+    }
+    return false;
+}
 
 function validateItem(item){
     validateEmail(item.email);
