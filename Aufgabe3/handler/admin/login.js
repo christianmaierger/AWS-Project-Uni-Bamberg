@@ -5,7 +5,6 @@ const validateInput = (data) => {
     const body = JSON.parse(data);
     const {email, password} = body;
     return !(!email || !password || password.length < 6);
-
 };
 
 const sendResponse = (statusCode, body) => {
@@ -28,7 +27,6 @@ module.exports.login = async (event) => {
         const {email, password} = event.headers;
 
         const {user_pool_id, client_id} = process.env;
-        console.log(process.env);
         const params = {
             AuthFlow: "ADMIN_NO_SRP_AUTH",
             UserPoolId: user_pool_id,
@@ -39,6 +37,13 @@ module.exports.login = async (event) => {
             },
         };
         const response = await cognito.adminInitiateAuth(params).promise();
+
+        if (response.ChallengeName !== undefined) {
+            return sendResponse(400, {
+                message: `User has a ChallengeName: ${response.ChallengeName}`
+            });
+        }
+
         return sendResponse(200, {
             message: "Success",
             token: response.AuthenticationResult.IdToken,
@@ -47,4 +52,11 @@ module.exports.login = async (event) => {
         const message = error.message ? error.message : "Internal server error";
         return sendResponse(500, {message});
     }
+};
+
+module.exports.privateArea = async (event) => {
+    console.log(event);
+    return sendResponse(200, {
+        message: `Email ${event.requestContext.authorizer.claims.email} has been authorized`,
+    });
 };

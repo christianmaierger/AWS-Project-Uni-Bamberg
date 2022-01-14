@@ -12,11 +12,10 @@ const {
 
 const {validatePlz, validatePrio} = require('../validator');
 
-async function getUsers(item, n) {
-    const {plz, priority} = item;
-
+async function getUsers(plz, priority, n) {
     validatePlz(plz);
     validatePrio(priority);
+
     if (n === 0) {
         return [];
     }
@@ -52,13 +51,10 @@ async function getUsers(item, n) {
 }
 
 module.exports.listUsersByPlz = async (event) => {
-    const plz = event.item.plz;
-    const priority = event.item.prio;
-    const n = event.n;
-    const item = {plz, priority};
+    const {plz, priority, n} = JSON.parse(event.body);
 
     try {
-        const response = await getUsers(item, n);
+        const response = await getUsers(plz, priority, n);
         if (isEmpty(response)) {
             return wrapResponse(404, 'Query did not return any user.');
         }

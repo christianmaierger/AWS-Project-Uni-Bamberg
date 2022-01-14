@@ -167,6 +167,22 @@ functions:
           path: ${file(./env.yml):AdminLoginPath}
           method: get
 
+  private:
+    handler: handler/admin/login.privateArea
+    events:
+      - http:
+          path: /private
+          method: post
+          authorizer:
+            name: PrivateAuthorizer
+            type: COGNITO_USER_POOLS
+            arn:
+              Fn::GetAtt:
+                - UserPool
+                - Arn
+            claims:
+              - email
+
   listUsersByPlz:
     handler: handler/listUsersByPlz.listUsersByPlz
     iamRoleStatements:
@@ -176,6 +192,19 @@ functions:
           - dynamodb:Query
         Resource:
           - !Sub '${UsersTableLukas.Arn}/index/${file(./env.yml):Index_Name}'
+    events:
+      - http:
+          path: ${file(./env.yml):AdminListUsersByPlzPath}
+          method: post # TODO change to get
+          authorizer:
+            name: PrivateAuthorizer
+            type: COGNITO_USER_POOLS
+            arn:
+              Fn::GetAtt:
+                - UserPool
+                - Arn
+            claims:
+              - email
 
   # Authorizer Functions
   tokenAuthorizer:
