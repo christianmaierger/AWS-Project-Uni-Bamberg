@@ -126,7 +126,8 @@ const errorType = {
     badPrio: "badPrio",
     badName: "badName",
     badIllness: "badIllness",
-    badRelevance: "badRelevance"
+    badRelevance: "badRelevance",
+    badPW: "badPW"
 };
 
 function handleError(err) {
@@ -182,6 +183,12 @@ function handleError(err) {
                 message:
                     "Relevance is not formatted correctly.",
             });
+        case errorType.badRelevance:
+            return wrapResponse(400, {
+                message:
+                    "Password is not formatted correctly: must be 8 chars long and cointain " +
+                    "at least 1 number and special character.",
+            });
         default:
             return wrapResponse(418, {
                 message: "Unknown error thrown: " + err,
@@ -193,6 +200,7 @@ function handleError(err) {
 const TableName = process.env.Table_Name;
 const GetFunction = process.env.Get_Function;
 const GSIName = process.env.GSI_Name;
+const GSI2Name = process.env.GSI2_Name;
 
 module.exports = {
     docClient,
@@ -204,6 +212,7 @@ module.exports = {
     handleError,
     TableName,
     GSIName,
+    GSI2Name,
     GetFunction,
     errorType,
     isAlreadyExisting,

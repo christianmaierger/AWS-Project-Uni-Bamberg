@@ -30,7 +30,12 @@ function isGenderValid(gender) {
 
 function isPrioValid(prio) {
     // todo undefined sein lassen oder rauswerfen
-    return (!prio || prio===undefined || prio === 1 || prio === 2 || prio === 3);
+
+    if (prio) {
+        return (prio === undefined || prio === 1 || prio === 2 || prio === 3);
+    }
+    // if undefined it is also ok, then person is underaged
+    return true;
 }
 
 function validateEmail(email) {
@@ -94,11 +99,19 @@ function validateprevIllness(illness) {
 }
 
 function validateSystemRelevant(relevance) {
-    if (relevance) {
-        if (relevance !== true || relevance !== false) {
+        if (!relevance || (relevance != "true" && relevance != "false")) {
             throw errorType.badRelevance;
         }
+}
+
+function validatePassword(pw) {
+
+   // Minimum eight characters, at least one letter, one number and one special character:
+    const regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
+    if (pw && !pw.match(regex)) {
+        throw errorType.badPW;
     }
+
 }
 
 function isIllOrRelevant(illness, relevance) {
@@ -135,6 +148,9 @@ function validateItem(item){
             case "relevance":
                 validateSystemRelevant(relevance);
                 break;
+            case "relevance":
+                validatePassword(pw);
+                break;
         }
     }
 }
@@ -164,5 +180,6 @@ module.exports = {
     validateItemNotExists,
     validateItem,
     validateprevIllness,
-    validateSystemRelevant
+    validateSystemRelevant,
+    validatePassword
 };

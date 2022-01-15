@@ -10,6 +10,7 @@ provider:
   environment:
     Table_Name: ${file(./env.yml):Table_Name}
     GSI_Name: ${file(./env.yml):Index_Name}
+    GSI2_Name: ${file(./env.yml):Index2_Name}
     Partition_Key: ${file(./env.yml):Partition_Key} #email
     Sort_Key: ${file(./env.yml):Sort_Key} #birthday
     Get_Function: ${self:functions.read.name}
@@ -22,6 +23,20 @@ package:
     - data/**
 
 functions:
+  authorizeUser:
+    handler: handler/auth/userAuthorizer.userAuthorizer
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - dynamodb:GetItem
+        Resource:
+          - "Fn::GetAtt": [ UsersTable, Arn ]
+      - Effect: "Allow"
+        Action:
+          - dynamodb:GetItem
+          - dynamodb:Query
+        Resource:
+          - !Sub '${UsersTable.Arn}/index/${file(./env.yml):Index2_Name}'
   logItemChanges:
     handler: handler/logItemChanges.logItemChanges
     events:
@@ -130,7 +145,13 @@ functions:
 
 resources: # CloudFormation template syntax from here on.
   Resources:
-    UsersTable: #must be same as TableName
+    UserApi:
+      Type: 'AWS::ApiGateway::RestApi'
+      Properties:
+        Body:
+        Description: An Api to allow clients CRUD operations on single users
+        Name: UserAPI
+    UsersTable:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: ${file(./env.yml):Table_Name}
@@ -141,6 +162,8 @@ resources: # CloudFormation template syntax from here on.
             AttributeType: S # N for number, must be parsed from user inputed String in ISO 8601 format!!!
           - AttributeName: ${file(./env.yml):Partition_Key2} # Plz
             AttributeType: S # S = String, N would be for Number
+          - AttributeName: ${file(./env.yml):Partition_Key3} # secret
+            AttributeType: N # S = String, N would be for Number
         KeySchema:
           - AttributeName: ${file(./env.yml):Partition_Key}
             KeyType: HASH # primary key
@@ -158,6 +181,12 @@ resources: # CloudFormation template syntax from here on.
                 KeyType: "RANGE"
             Projection:
               ProjectionType: "ALL"
+          - IndexName: ${file(./env.yml):Index2_Name}
+            KeySchema:
+              - AttributeName: ${file(./env.yml):Partition_Key3} # secret
+                KeyType: "HASH"
+            Projection:
+              ProjectionType: "KEYS_ONLY"
 
 plugins:
   - serverless-iam-roles-per-function

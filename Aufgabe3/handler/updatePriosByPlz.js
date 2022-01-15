@@ -43,9 +43,6 @@ async function updatePriosByPlz(item) {
     }
 
     let resultList = response.Items;
-    let objList = [] ;
-
-
 
 //todo resultListtodo method will potentially run very long, look for iac way to set long timeout
 

@@ -1,12 +1,14 @@
 {
   "item": {
-    "email": "max.muster@web.com",
+    "email": "m.muller@abax.com",
     "plz": "96052",
     "birthday": "1958-01-02",
     "gender": "w",
+    "pw": "aber2!holen",
+    "relevance": "false",
     "name": {
-      "surname": "Maxima Andrea Petra",
-      "lastname": "Meidinger"
+      "surname": "Petra",
+      "lastname": "Mueller"
     }
   }
 }

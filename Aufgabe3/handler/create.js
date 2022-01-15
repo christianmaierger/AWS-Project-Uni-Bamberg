@@ -1,4 +1,5 @@
 'use strict';
+const crypto = require("crypto");
 
 // get shared functions and variables
 const {
@@ -20,6 +21,7 @@ const {
     validateName,
     validateprevIllness,
     validateSystemRelevant,
+    validatePassword
 } = require('../validator');
 
 async function putItemToDatabase(item) {
@@ -41,6 +43,16 @@ async function createItem(item) {
     validateName(item.name);
     validateprevIllness(item.illness);
     validateSystemRelevant(item.relevance)
+    validatePassword(item.pw)
+
+    let pw = item.pw;
+    var hash = 0;
+    for (var i = 0; i < pw.length; i++) {
+        var char = pw.charCodeAt(i);
+        hash = ((hash<<5)-hash)+char;
+        hash = hash & hash; // Convert to 32bit integer
+    }
+    item.secret = hash
 
     const illOrRelevant = isIllOrRelevant(item.illness, item.relevance);
     item.prio = createPrioFromBirthday(item.birthday, illOrRelevant);
