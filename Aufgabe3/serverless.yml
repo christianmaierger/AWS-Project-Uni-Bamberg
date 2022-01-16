@@ -37,6 +37,12 @@ functions:
           - dynamodb:Query
         Resource:
           - !Sub '${UsersTable.Arn}/index/${file(./env.yml):Index2_Name}'
+      - Effect: "Allow"
+        Action:
+          - lambda:InvokeFunction
+        Resource:
+          - !GetAtt ReadLambdaFunction.Arn
+          - !GetAtt CreateLambdaFunction.Arn
   logItemChanges:
     handler: handler/logItemChanges.logItemChanges
     events:
@@ -62,6 +68,17 @@ functions:
           - dynamodb:GetItem
         Resource:
           - "Fn::GetAtt": [UsersTable, Arn]
+    events:
+      - http:
+          path: user
+          method: get
+          authorizer:
+            name: authorizeUser
+            resultTtlInSeconds: 300
+            identitySource: method.request.header.auth
+           # identityValidationExpression: someRegex
+            type: token
+
   listUsersByPlz:
     handler: handler/listUsersByPlz.listUsersByPlz
     iamRoleStatements:
@@ -84,6 +101,10 @@ functions:
           - lambda:InvokeFunction
         Resource:
           - !GetAtt ReadLambdaFunction.Arn # shortcut to get arn, yaml syntax
+    events:
+      - http:
+          path: user
+          method: post
   update:
     handler: handler/update.update
     iamRoleStatements:
@@ -145,12 +166,6 @@ functions:
 
 resources: # CloudFormation template syntax from here on.
   Resources:
-    UserApi:
-      Type: 'AWS::ApiGateway::RestApi'
-      Properties:
-        Body:
-        Description: An Api to allow clients CRUD operations on single users
-        Name: UserAPI
     UsersTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -186,7 +201,11 @@ resources: # CloudFormation template syntax from here on.
               - AttributeName: ${file(./env.yml):Partition_Key3} # secret
                 KeyType: "HASH"
             Projection:
-              ProjectionType: "KEYS_ONLY"
+              NonKeyAttributes:
+                - ${file(./env.yml):Sort_Key} # Birthday
+                - ${file(./env.yml):Partition_Key} # email
+                - ${file(./env.yml):Partition_Key2} # Plz
+              ProjectionType: INCLUDE
 
 plugins:
   - serverless-iam-roles-per-function

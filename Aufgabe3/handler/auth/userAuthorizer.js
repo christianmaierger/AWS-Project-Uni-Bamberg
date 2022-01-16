@@ -14,8 +14,6 @@ exports.userAuthorizer = async function(event, context, callback) {
     // Do not print the auth token unless absolutely necessary
     // console.log('Client token: ' + event.authorizationToken);
     console.log('Method ARN: ' + event.methodArn);
-    console.log('event: ' + event);
-    console.log('context: ' + context);
     // validate the incoming token
     // and produce the principal user identifier associated with the token
 
@@ -57,14 +55,15 @@ exports.userAuthorizer = async function(event, context, callback) {
     // the example policy below denies access to all resources in the RestApi
     var policy = new AuthPolicy(principalId, awsAccountId, apiOptions);
     //policy.denyAllMethods();
-    console.log('Client token: ' + event.authorizationToken);
     // always allow creation
-    policy.allowMethod(AuthPolicy.HttpVerb.POST, "/chrisres");
+    policy.allowMethod(AuthPolicy.HttpVerb.POST, "/user");
+
 
 
     // authenticate the token the user send with request
     let secret = event.authorizationToken
     secret = parseInt(secret)
+    console.log(secret)
 
     let response;
     try {
@@ -85,18 +84,25 @@ exports.userAuthorizer = async function(event, context, callback) {
         }
         throw errorType.dberror;
     }
-
+    let usr;
     if (response.Items.length!=0) {
-    // if found secret/user is in db and is allowed to perfom single CRUD operations
-
-        // allows GET on user
+        // if found secret/user is in db and is allowed to perfom single CRUD operations
+        console.log("SECRET FOUND ROUTES ALLOWED");
         policy.allowMethod(AuthPolicy.HttpVerb.GET, "/user");
         policy.allowMethod(AuthPolicy.HttpVerb.PUT, "/user");
         policy.allowMethod(AuthPolicy.HttpVerb.DELETE, "/user");
+        usr = response.Items[0];
+        usr =  JSON.stringify(usr)
+        //  let obj = JSON.parse(str)
+        console.log(usr)
     }
+    
 
     // finally, build the policy
     var authResponse = policy.build();
+
+
+
 
     // new! -- add additional key-value pairs
     // these are made available by APIGW like so: $context.authorizer.<key>
@@ -104,7 +110,8 @@ exports.userAuthorizer = async function(event, context, callback) {
     authResponse.context = {
         key : 'value', // $context.authorizer.key -> value todo real token ??
         number : 1,
-        bool: true
+        bool: true,
+        user: usr,
     };
     // authResponse.context.arr = ['foo']; <- this is invalid, APIGW will not accept it
     // authResponse.context.obj = {'foo':'bar'}; <- also invalid
