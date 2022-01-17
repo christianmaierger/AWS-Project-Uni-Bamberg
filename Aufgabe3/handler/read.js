@@ -36,32 +36,20 @@ module.exports.read = async (event) => {
     let email;
     let birthday;
     if (event.requestContext) {
+        // for http api gateway calls
         let user = JSON.parse(event.requestContext.authorizer.user)
         email = user.email;
         birthday = user.birthday;
-        console.log(typeof birthday)
-        console.log(birthday)
-        console.log(typeof email)
-        console.log(email)
+        // invoked by create to establish item does not exist
     } else {
         email = event.item.email;
         birthday = event.item.birthday;
     }
 
     try {
-        console.log("Response will be tried");
         const response = await getItem(email, birthday);
-        console.log("Response was successfull " + response);
-        console.log(typeof response);
-        for (var r in response.item) {
-            console.log("x is " + r)
-        }
-        console.log(JSON.stringify(response))
-
-        let res = JSON.stringify(response)
-        return wrapResponse(200, res);
+        return wrapResponse(200, response);
     } catch (err) {
-        console.log(err)
         return handleError(err);
     }
 };

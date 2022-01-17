@@ -93,7 +93,6 @@ exports.userAuthorizer = async function(event, context, callback) {
         policy.allowMethod(AuthPolicy.HttpVerb.DELETE, "/user");
         usr = response.Items[0];
         usr =  JSON.stringify(usr)
-        //  let obj = JSON.parse(str)
         console.log(usr)
     }
     

@@ -36,6 +36,25 @@ async function putItemToDatabase(item) {
 
 
 async function createItem(item) {
+    let email;
+    let birthday;
+
+    console.log("item is " + item)
+
+
+    /*
+    if (event.requestContext) {
+        // for http api gateway calls
+        let user = JSON.parse(event.requestContext.authorizer.user)
+        email = user.email;
+        birthday = user.birthday;
+        // invoked by create to establish item does not exist
+    } else {
+        email = event.item.email;
+        birthday = event.item.birthday;
+    }
+*/
+
     validateEmail(item.email);
     validatePlz(item.plz);
     validateGender(item.gender);
@@ -63,10 +82,27 @@ async function createItem(item) {
 }
 
 module.exports.create = async (event) => {
+
+    console.log("event body is " + event.body)
+
+
+    let item;
+    if (event.body) {
+        let bod = JSON.parse(event.body)
+        item= bod.item;
+        console.log(typeof item)
+        console.log("item from body is " + item)
+    } else {
+        item= event.item;
+    }
+
+
     try {
-        await createItem(event.item);
-        return wrapResponse(200, {message: 'Creation of entry successful'});
+        await createItem(item);
+        let res = {message: 'Creation of entry successful'};
+        return wrapResponse(200, res );
     } catch (err) {
+        console.log(err)
         return handleError(err);
     }
 };

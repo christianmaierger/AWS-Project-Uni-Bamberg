@@ -13,6 +13,7 @@ function isEmpty(obj) {
 
 
 function wrapResponse(statusCode, data) {
+    data = JSON.stringify(data)
     return {
         statusCode: statusCode,
         body: data,
