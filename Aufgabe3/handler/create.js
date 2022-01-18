@@ -57,7 +57,7 @@ module.exports.create = async (event) => {
     const item = JSON.parse(event.body).item;
     try {
         await createItem(item);
-        return wrapResponse(200, {message: 'Creation of entry successful'});
+        return wrapResponse(201, {message: 'Creation of entry successful'});
     } catch (err) {
         return handleError(err);
     }

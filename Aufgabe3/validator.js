@@ -43,7 +43,7 @@ function isPreDiseaseValid(pre_disease) {
 function isValidPassword(password){
     // Minimum eight characters, at least one letter, one number and one special character from @$!%*#?&§%&|+-_=/*()
     const regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&§%&|+-_=\/*()"']{8,}$/;
-    return password !== undefined && w.match(regex);
+    return password !== undefined && password.match(regex);
 }
 
 function validateEmail(email) {

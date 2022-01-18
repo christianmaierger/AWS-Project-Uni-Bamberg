@@ -31,7 +31,7 @@ async function getUsers(plz, priority, n) {
                     ':plz': plz,
                     ':prio': priority,
                 },
-                ScanIndexForward: true, // this detirmines if sorted ascending or descending by range key
+                ScanIndexForward: true, // this determines if sorted ascending or descending by range key
                 FilterExpression: 'prio = :prio',
             })
             .promise();

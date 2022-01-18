@@ -1,4 +1,4 @@
-service: task3-lukas
+service: task3-chris
 
 frameworkVersion: "2"
 
@@ -8,7 +8,7 @@ provider:
   lambdaHashingVersion: 20201221
   region: eu-central-1
   environment:
-    Table_Name: ${file(./env.yml):Table_Name}
+    Table_Name: ${file(./env.yml):Users_Table_Name}
     GSI_Name: ${file(./env.yml):Index_Name}
     Partition_Key: ${file(./env.yml):Partition_Key} # email
     Sort_Key: ${file(./env.yml):Sort_Key} # birthday
@@ -76,6 +76,7 @@ functions:
       - Effect: "Allow"
         Action:
           - dynamodb:PutItem
+          - dynamodb:UpdateItem
         Resource:
           - "Fn::GetAtt": [ UsersTableLukas, Arn ]
       - Effect: "Allow"
@@ -98,6 +99,7 @@ functions:
       - Effect: "Allow"
         Action:
           - dynamodb:PutItem
+          - dynamodb:UpdateItem
         Resource:
           - "Fn::GetAtt": [ UsersTableLukas, Arn ]
       - Effect: "Allow"
@@ -150,6 +152,17 @@ functions:
 
   userLogout:
     handler: handler/logout.logout
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - dynamodb:DeleteItem
+        Resource:
+          - "Fn::GetAtt": [ UsersTableLukas, Arn ] # longer way to get the arn JSON like
+      - Effect: "Allow"
+        Action:
+          - dynamodb:UpdateItem
+        Resource:
+          - "Fn::GetAtt": [ UsersTableLukas, Arn ]
     events:
       - http:
           path: ${file(./env.yml):UserLogoutPath}

@@ -22,6 +22,7 @@ async function getUsersByPriority(priority, plz, n) {
 
     let response;
     try {
+        // TODO only people without date should be retrieved
         response = await docClient
             .query({
                 TableName: TableName,
@@ -31,7 +32,7 @@ async function getUsersByPriority(priority, plz, n) {
                     ':plz': plz,
                     ':prio': priority,
                 },
-                ScanIndexForward: true, // this detirmines if sorted ascending or descending by range key
+                ScanIndexForward: true, // this determines if sorted ascending or descending by range key
                 FilterExpression: 'prio = :prio',
             })
             .promise();
