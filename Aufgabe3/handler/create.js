@@ -16,7 +16,7 @@ const {
     validateBirthday,
     validateGender,
     validateItemNotExists,
-    validateName, validatePreDisease, validateSystemRelevance, validatePassword,
+    validateName, validatePreDisease, validateSystemRelevance, validatePassword, validateItem,
 } = require('../validator');
 
 async function putItemToDatabase(item) {
@@ -30,14 +30,16 @@ async function putItemToDatabase(item) {
 }
 
 async function createItem(item) {
-    validateEmail(item.email);
+  /*  validateEmail(item.email);
     validatePlz(item.plz);
     validateGender(item.gender);
     validateBirthday(item.birthday);
     validateName(item.name);
     validatePreDisease(item.pre_diseases)
     validateSystemRelevance(item.system_relevance);
-    validatePassword(item.password);
+    validatePassword(item.password);*/
+    // todo, könnte man doch direkt mit der Funktion machen?
+    validateItem(item)
 
     if (item.token !== undefined) {
         delete item.token;

@@ -216,10 +216,16 @@ function handleError(err) {
                 message:
                     "Pre Diseases is not formatted correctly.",
             });
+        case errorType.badPassword:
+            return wrapResponse(400, {
+                message:
+                    "Password is not formatted correctly. Please use at least 8 characters, at least one number and one " +
+                    "special character out of the following: @$!%*#?&§%&|+-_=/*()\"'"
+            });
         case errorType.notAllNecessaryInformation:
             return wrapResponse(400, {
                 message:
-                    "Not all necessary information are provided. Please ensure that pre_diseases and system_relevance is listed.",
+                    "Not all necessary information is provided. Please ensure that pre_diseases and system_relevance is listed.",
             });
         default:
             return wrapResponse(418, {

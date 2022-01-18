@@ -35,10 +35,11 @@ async function updateItem(itemChanges, item) {
         throw errorType.notAllNecessaryInformation;
     }
 
-    const updateItemBundle = {};
+    let updateItemBundle = {};
     updateItemBundle.email = item.email;
     updateItemBundle.birthday = item.birthday;
 
+    //todo email nicht änderbar?
     delete itemChanges.email;
     delete itemChanges.birthday;
     delete itemChanges.token;
@@ -47,18 +48,28 @@ async function updateItem(itemChanges, item) {
         return;
     }
 
+    // validation würde ich vorziehen, können ja aufhören, wenn Unsin ni nder Änderung ist? und pw würde ich da mit machen
+    // der Konsistenz wegen
+    await validateItem(itemChanges);
+
     for (const key in itemChanges) {
         const value = itemChanges[key];
         if (key === "password") {
-            validatePassword(value);
+            //validatePassword(value);
             itemChanges[key] = hashPassword(value);
         }
         updateItemBundle[key] = value;
     }
 
+     /*if (itemChanges["password"]) {
+         validatePassword(value);
+         itemChanges[key] = hashPassword(value);
+         updateItemBundle= itemChanges;
+     }*/
+
     updateItemBundle.prio = createPriority(item.birthday, item.system_relevance, item.pre_diseases);
 
-    await validateItem(updateItemBundle);
+    //await validateItem(updateItemBundle);
 
     const params = wrapUpdateParams(updateItemBundle);
     try {

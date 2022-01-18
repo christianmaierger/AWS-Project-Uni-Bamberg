@@ -41,7 +41,9 @@ function isPreDiseaseValid(pre_disease) {
 }
 
 function isValidPassword(password){
-    return password !== undefined && password.length >= 8;
+    // Minimum eight characters, at least one letter, one number and one special character from @$!%*#?&§%&|+-_=/*()
+    const regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&§%&|+-_=\/*()"']{8,}$/;
+    return password !== undefined && w.match(regex);
 }
 
 function validateEmail(email) {
@@ -134,6 +136,9 @@ function validateItem(item) {
                 break;
             case "pre_diseases":
                 validatePreDisease(element);
+                break;
+            case "password":
+                validatePassword(element);
                 break;
         }
     }
