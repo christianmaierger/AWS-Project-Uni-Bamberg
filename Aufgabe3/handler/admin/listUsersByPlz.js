@@ -8,9 +8,9 @@ const {
     handleError,
     TableName,
     GSIName, isEmpty,
-} = require('../shared');
+} = require('../../shared');
 
-const {validatePlz, validatePrio} = require('../validator');
+const {validatePlz, validatePrio} = require('../../validator');
 
 async function getUsers(plz, priority, n) {
     validatePlz(plz);

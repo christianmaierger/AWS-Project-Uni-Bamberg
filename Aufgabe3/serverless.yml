@@ -261,6 +261,35 @@ functions:
             claims:
               - email
 
+  assignVaccinationDates:
+    handler: handler/admin/assignVaccinationDatesByPlz.assignVaccinationDatesByPlz
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - dynamodb:Query
+        Resource:
+          - !Sub '${UsersTableChris.Arn}/index/${file(./env.yml):Index_Name}'
+      - Effect: "Allow"
+        Action:
+          - dynamodb:UpdateItem
+        Resource:
+          - "Fn::GetAtt": [ UsersTableChris, Arn ]
+
+    events:
+      - http:
+          path: ${file(./env.yml):AdminAssignVaccinationDates}
+          method: post
+          authorizer:
+            name: PrivateAuthorizer
+            type: COGNITO_USER_POOLS
+            arn:
+              Fn::GetAtt:
+                - UserPool
+                - Arn
+            claims:
+              - email
+
+
   # Authorizer Functions
   tokenAuthorizer:
     handler: authorizer/tokenAuthorizer.authorizer

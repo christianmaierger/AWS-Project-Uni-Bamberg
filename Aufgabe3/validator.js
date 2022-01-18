@@ -46,6 +46,26 @@ function isValidPassword(password){
     return password !== undefined && password.match(regex);
 }
 
+function isVaccinationDateValid(date) {
+    const validationRegex = /^([0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])$/;
+    let notInPast;
+    var now = new Date();
+    now.setHours(0,0,0,0);
+    let d = new Date(date)
+    d.setHours(0,0,0,0);
+
+    console.log(now)
+    console.log(d)
+    if (d < now) {
+        notInPast=false;
+        console.log("Selected date is in the past");
+    } else {
+        notInPast=true;
+        console.log("Selected date is NOT in the past");
+    }
+    return date && date.match(validationRegex) && notInPast
+}
+
 function validateEmail(email) {
     if (!isMailValid(email)) {
         throw errorType.badEmail;
@@ -112,6 +132,12 @@ function validateName(name) {
     }
 }
 
+function validateVaccinationDate(date) {
+    if (!isVaccinationDateValid(date)) {
+        throw errorType.badDate;
+    }
+}
+
 function validateItem(item) {
     validateEmail(item.email);
     validateBirthday(item.birthday);
@@ -170,5 +196,6 @@ module.exports = {
     validateName,
     validateItemExists,
     validateItemNotExists,
-    validateItem
+    validateItem,
+    validateVaccinationDate
 };

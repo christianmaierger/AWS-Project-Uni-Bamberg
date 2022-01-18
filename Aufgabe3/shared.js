@@ -160,6 +160,7 @@ const errorType = {
     badPreDiseases: "badPreDiseases",
     badSystemRelevance: "badSystemRelevance",
     notAllNecessaryInformation: "notAllNecessaryInformation",
+    badDate: "badVaccinationDate"
 };
 
 function handleError(err) {
@@ -221,6 +222,11 @@ function handleError(err) {
                 message:
                     "Password is not formatted correctly. Please use at least 8 characters, at least one number and one " +
                     "special character out of the following: @$!%*#?&§%&|+-_=/*()\"'"
+            });
+        case errorType.badDate:
+            return wrapResponse(400, {
+                message:
+                    "Vaccination Date was not formatted correctly or is in past"
             });
         case errorType.notAllNecessaryInformation:
             return wrapResponse(400, {
