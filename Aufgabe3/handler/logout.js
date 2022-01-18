@@ -2,9 +2,11 @@ const {wrapResponse, docClient, errorType, wrapDeleteParams} = require("../share
 
 async function removeTokenFromDb(item) {
     const params = wrapDeleteParams(["loginToken"], item);
+    console.log(params);
     try {
         await docClient.update(params).promise();
     } catch (error) {
+        console.log(error);
         throw errorType.dberror;
     }
 }
