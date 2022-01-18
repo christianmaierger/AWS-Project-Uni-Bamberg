@@ -10,6 +10,17 @@ const {
     hashPassword, createPriority,
 } = require('../shared');
 
+// Load the AWS SDK for Node.js
+const AWS = require("aws-sdk");
+const crypto = require("crypto");
+// Create DynamoDB document client
+
+const GetFunction = process.env.Get_Function;
+
+const lambda = new AWS.Lambda({
+    region: "eu-central-1",
+});
+
 const {
     validateEmail,
     validatePlz,
@@ -30,14 +41,14 @@ async function putItemToDatabase(item) {
 }
 
 async function createItem(item) {
-  /*  validateEmail(item.email);
-    validatePlz(item.plz);
-    validateGender(item.gender);
-    validateBirthday(item.birthday);
-    validateName(item.name);
-    validatePreDisease(item.pre_diseases)
-    validateSystemRelevance(item.system_relevance);
-    validatePassword(item.password);*/
+    /*  validateEmail(item.email);
+      validatePlz(item.plz);
+      validateGender(item.gender);
+      validateBirthday(item.birthday);
+      validateName(item.name);
+      validatePreDisease(item.pre_diseases)
+      validateSystemRelevance(item.system_relevance);
+      validatePassword(item.password);*/
     // todo, könnte man doch direkt mit der Funktion machen?
     validateItem(item)
 
@@ -56,9 +67,11 @@ async function createItem(item) {
 module.exports.create = async (event) => {
     const item = JSON.parse(event.body).item;
     try {
-        await createItem(item);
+        let res =  await createItem(item);
+        console.log(res)
         return wrapResponse(201, {message: 'Creation of entry successful'});
     } catch (err) {
+        console.log(err)
         return handleError(err);
     }
 };
