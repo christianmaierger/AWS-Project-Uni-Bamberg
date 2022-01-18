@@ -1,18 +1,54 @@
 'use strict';
 
+
 // get shared functions and variables
 const {
     docClient,
+    ses,
     wrapResponse,
     errorType,
     handleError,
     TableName,
     GSIName,
     isEmpty,
+    wrapUpdateParams
 } = require('../../shared');
 
 const {validatePlz, validateVaccinationDate} = require('../../validator');
-const {createPriority, wrapUpdateParams} = require("../../shared");
+
+
+
+
+
+async function sendMail (user, date) {
+    try {
+        let adress = user.email
+        var params = {
+            Destination: {
+                ToAddresses: [adress],
+            },
+            Message: {
+                Body: {
+                    Html: {
+                        Charset: "UTF-8",
+                        Data:
+                            "<html><body><h3>Guten Tag " + user.fullname.surname + " " + user.fullname.lastname + "  ,</h3>" +
+                            "<p> wir freuen uns Ihnen hiermit einen Termin anbieten zu können am: </p>" +
+                            "<div style='color:darkblue'>" + date + "</div> " +
+                            "<br> <p>Bleiben Sie gesund und beste Grüße </p> <p>Ihr Impfteam Bayern</p>  " +
+                            "</body></html>" },
+                },
+
+                Subject: {  Data: "Ihr Impftermim am " + date },
+            },
+            Source: adress,
+        };
+        return ses.sendEmail(params).promise()
+    } catch (err) {
+        console.log(err)
+        handleError(err)
+    }
+};
 
 async function getUsersByPriority(priority, plz, n) {
 
@@ -33,7 +69,7 @@ async function getUsersByPriority(priority, plz, n) {
                     ':prio': priority,
                 },
                 ScanIndexForward: true, // this determines if sorted ascending or descending by range key
-                FilterExpression: 'prio = :prio',
+                FilterExpression: 'prio = :prio AND attribute_not_exists(vaccinationDate)'
             })
             .promise();
     } catch (error) {
@@ -76,6 +112,8 @@ async function assignDatesToPriorityAndGetAvailable(priority, plz, date, vaccina
         const params = wrapUpdateParams(updateItemBundle);
         promises.push(docClient.update(params).promise());
         // TODO notify users
+
+        sendMail(user, date)
     }
 
     await Promise.all(promises).catch((err) => {
@@ -83,8 +121,8 @@ async function assignDatesToPriorityAndGetAvailable(priority, plz, date, vaccina
         throw errorType.dberror;
     });
 
-   // const vaccinationsAssigned = vaccinationsToAssign - users.length;
-   // const vaccinationsLeftOver = vaccinationsToAssign - vaccinationsAssigned;
+    // const vaccinationsAssigned = vaccinationsToAssign - users.length;
+    // const vaccinationsLeftOver = vaccinationsToAssign - vaccinationsAssigned;
 
     const vaccinationsAssigned = users.length;
     const vaccinationsLeftOver = vaccinationsToAssign - users.length;
@@ -128,3 +166,4 @@ module.exports.assignVaccinationDatesByPlz = async (event) => {
         return handleError(err);
     }
 };
+

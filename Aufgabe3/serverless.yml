@@ -274,6 +274,11 @@ functions:
           - dynamodb:UpdateItem
         Resource:
           - "Fn::GetAtt": [ UsersTableChris, Arn ]
+      - Effect: "Allow"
+        Action:
+          - ses:SendEmail
+          - ses:SendRawEmail
+        Resource: "*"
 
     events:
       - http:

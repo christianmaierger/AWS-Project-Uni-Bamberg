@@ -1,6 +1,7 @@
 // Load the AWS SDK for Node.js
 const AWS = require("aws-sdk");
 const crypto = require("crypto");
+const ses = new AWS.SES({ region: "eu-central-1" });
 // Create DynamoDB document client
 const docClient = new AWS.DynamoDB.DocumentClient({apiVersion: "2012-08-10"});
 
@@ -247,6 +248,7 @@ const GSIName = process.env.GSI_Name;
 const TokenIndexName = process.env.Token_Index_Name;
 
 module.exports = {
+    ses,
     docClient,
     lambda,
     isEmpty,
