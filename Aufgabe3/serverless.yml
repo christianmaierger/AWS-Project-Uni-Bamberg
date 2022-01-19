@@ -51,6 +51,7 @@ functions:
             identitySource: method.request.header.Authorization
             type: token
             name: tokenAuthorizer
+            resultTtlInSeconds: 0
 
   create:
     handler: handler/create.create
@@ -92,6 +93,7 @@ functions:
             identitySource: method.request.header.Authorization
             type: token
             name: tokenAuthorizer
+            resultTtlInSeconds: 0
 
   updatePrio:
     handler: handler/updatePrio.updatePrio
@@ -115,6 +117,7 @@ functions:
             identitySource: method.request.header.Authorization
             type: token
             name: tokenAuthorizer
+            resultTtlInSeconds: 0
 
   delete:
     handler: handler/delete.delete
@@ -137,6 +140,7 @@ functions:
             identitySource: method.request.header.Authorization
             type: token
             name: tokenAuthorizer
+            resultTtlInSeconds: 0
 
   # Login in and out
   login:
@@ -149,6 +153,7 @@ functions:
             identitySource: method.request.header.email, method.request.header.birthday, method.request.header.password
             type: request
             name: loginAuthorizer
+            resultTtlInSeconds: 0
 
   userLogout:
     handler: handler/logout.logout
@@ -171,6 +176,7 @@ functions:
             identitySource: method.request.header.Authorization
             type: token
             name: tokenAuthorizer
+            resultTtlInSeconds: 0
 
   # Admin Functions
   adminLogin:
