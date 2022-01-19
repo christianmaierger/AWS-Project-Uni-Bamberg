@@ -1,4 +1,4 @@
-service: task3-chris
+service: task3
 
 frameworkVersion: "2"
 
@@ -42,7 +42,7 @@ functions:
         Action:
           - dynamodb:GetItem
         Resource:
-          - "Fn::GetAtt": [ UsersTableChris, Arn ]
+          - "Fn::GetAtt": [ UsersTable, Arn ]
     events:
       - http:
           path: ${file(./env.yml):UserGetInformation}
@@ -60,7 +60,7 @@ functions:
         Action:
           - dynamodb:PutItem
         Resource:
-          - "Fn::GetAtt": [ UsersTableChris, Arn ]
+          - "Fn::GetAtt": [ UsersTable, Arn ]
       - Effect: "Allow"
         Action:
           - lambda:InvokeFunction
@@ -79,7 +79,7 @@ functions:
           - dynamodb:PutItem
           - dynamodb:UpdateItem
         Resource:
-          - "Fn::GetAtt": [ UsersTableChris, Arn ]
+          - "Fn::GetAtt": [ UsersTable, Arn ]
       - Effect: "Allow"
         Action:
           - lambda:InvokeFunction
@@ -103,7 +103,7 @@ functions:
           - dynamodb:PutItem
           - dynamodb:UpdateItem
         Resource:
-          - "Fn::GetAtt": [ UsersTableChris, Arn ]
+          - "Fn::GetAtt": [ UsersTable, Arn ]
       - Effect: "Allow"
         Action:
           - lambda:InvokeFunction
@@ -126,7 +126,7 @@ functions:
         Action:
           - dynamodb:DeleteItem
         Resource:
-          - "Fn::GetAtt": [ UsersTableChris, Arn ] # longer way to get the arn JSON like
+          - "Fn::GetAtt": [ UsersTable, Arn ] # longer way to get the arn JSON like
       - Effect: "Allow"
         Action:
           - lambda:InvokeFunction
@@ -161,13 +161,9 @@ functions:
       - Effect: "Allow"
         Action:
           - dynamodb:DeleteItem
-        Resource:
-          - "Fn::GetAtt": [ UsersTableChris, Arn ] # longer way to get the arn JSON like
-      - Effect: "Allow"
-        Action:
           - dynamodb:UpdateItem
         Resource:
-          - "Fn::GetAtt": [ UsersTableChris, Arn ]
+          - "Fn::GetAtt": [ UsersTable, Arn ] # longer way to get the arn JSON like
     events:
       - http:
           path: ${file(./env.yml):UserLogoutPath}
@@ -228,8 +224,8 @@ functions:
           - dynamodb:PutItem
           - dynamodb:UpdateItem
         Resource:
-          - "Fn::GetAtt": [ UsersTableChris, Arn ]
-          - !Sub '${UsersTableChris.Arn}/index/${file(./env.yml):Index_Name}'
+          - "Fn::GetAtt": [ UsersTable, Arn ]
+          - !Sub '${UsersTable.Arn}/index/${file(./env.yml):Index_Name}'
     events:
       - http:
           path: ${file(./env.yml):AdminUpdateUsersByPlzPath}
@@ -252,11 +248,11 @@ functions:
           - dynamodb:GetItem
           - dynamodb:Query
         Resource:
-          - !Sub '${UsersTableChris.Arn}/index/${file(./env.yml):Index_Name}'
+          - !Sub '${UsersTable.Arn}/index/${file(./env.yml):Index_Name}'
     events:
       - http:
           path: ${file(./env.yml):AdminListUsersByPlzPath}
-          method: post # TODO change to get
+          method: get
           authorizer:
             name: PrivateAuthorizer
             type: COGNITO_USER_POOLS
@@ -274,12 +270,12 @@ functions:
         Action:
           - dynamodb:Query
         Resource:
-          - !Sub '${UsersTableChris.Arn}/index/${file(./env.yml):Index_Name}'
+          - !Sub '${UsersTable.Arn}/index/${file(./env.yml):Index_Name}'
       - Effect: "Allow"
         Action:
           - dynamodb:UpdateItem
         Resource:
-          - "Fn::GetAtt": [ UsersTableChris, Arn ]
+          - "Fn::GetAtt": [ UsersTable, Arn ]
       - Effect: "Allow"
         Action:
           - ses:SendEmail
@@ -312,8 +308,8 @@ functions:
           - dynamodb:PutItem
           - dynamodb:UpdateItem
         Resource:
-          - "Fn::GetAtt": [ UsersTableChris, Arn ]
-          - !Sub "${UsersTableChris.Arn}/index/${file(./env.yml):Token_Index_Name}"
+          - "Fn::GetAtt": [ UsersTable, Arn ]
+          - !Sub "${UsersTable.Arn}/index/${file(./env.yml):Token_Index_Name}"
 
   loginAuthorizer:
     handler: authorizer/loginAuthorizer.authorizer
@@ -324,7 +320,7 @@ functions:
           - dynamodb:PutItem
           - dynamodb:UpdateItem
         Resource:
-          - "Fn::GetAtt": [ UsersTableChris, Arn ]
+          - "Fn::GetAtt": [ UsersTable, Arn ]
 
   # Additional Functions
   logItemChanges:
@@ -333,7 +329,7 @@ functions:
       - stream:
           type: dynamodb
           arn:
-            Fn::GetAtt: [ UsersTableChris, StreamArn ]
+            Fn::GetAtt: [ UsersTable, StreamArn ]
     iamRoleStatements:
       - Effect: "Allow"
         Action:
@@ -342,11 +338,11 @@ functions:
           - dynamodb:GetShardIterator
           - dynamodb:ListStreams
         Resource:
-          - "Fn::GetAtt": [ UsersTableChris, Arn ]
+          - "Fn::GetAtt": [ UsersTable, Arn ]
 
 resources: # CloudFormation template syntax from here on.
   Resources:
-    UsersTableChris: #must be same as TableName
+    UsersTable: #must be same as TableName
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: ${file(./env.yml):Users_Table_Name}
