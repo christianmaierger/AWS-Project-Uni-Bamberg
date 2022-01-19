@@ -23,7 +23,7 @@ module.exports.authorizer = async (event, context, callback) => {
 
     const token = event.authorizationToken;
 
-    const principalId = "user|a1b2c3d4";
+    const principalId = `${token}`;
 
     const apiOptions = {};
     const tmp = event.methodArn.split(":");

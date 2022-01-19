@@ -41,6 +41,7 @@ module.exports.authorizer = async (event, context, callback) => {
     // Do not print the auth token unless absolutely necessary
     // console.log('Client token: ' + event.authorizationToken);
     console.log("Method ARN: " + event.methodArn);
+    console.log(event);
 
     const email = event.headers.email;
     const password = event.headers.password;

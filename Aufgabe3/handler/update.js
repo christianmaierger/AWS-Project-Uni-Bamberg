@@ -65,7 +65,7 @@ async function updateItem(itemChanges, item) {
     }
      console.log(noChanges)
      **/
-    let updateItemBundle = {};
+    const updateItemBundle = {};
     updateItemBundle.email = item.email;
     updateItemBundle.birthday = item.birthday;
 
@@ -74,8 +74,6 @@ async function updateItem(itemChanges, item) {
 
     await validateItem(itemChanges);
 
-
-    //todo email nicht änderbar?
     delete itemChanges.email;
     delete itemChanges.birthday;
     delete itemChanges.token;
@@ -83,7 +81,7 @@ async function updateItem(itemChanges, item) {
 
     // added response to let user know nothing was changed, because only bday/mail/token given or the same attributes
     if (Object.keys(itemChanges).length === 0 /**|| noChanges == true**/) {
-        return wrapResponse(400, {message: 'No changed values given - No update made'});
+        return wrapResponse(400, {message: 'No changed values given - No update made.'});
     }
 
 
@@ -91,15 +89,13 @@ async function updateItem(itemChanges, item) {
     for (const key in itemChanges) {
         const value = itemChanges[key];
         if (key === "password") {
-            //validatePassword(value);
+            validatePassword(value);
             itemChanges[key] = hashPassword(value);
         }
         updateItemBundle[key] = value;
-        console.log(key + "----" + value)
     }
 
     updateItemBundle.prio = createPriority(item.birthday, item.system_relevance, item.pre_diseases);
-
 
     const params = wrapUpdateParams(updateItemBundle);
     try {
@@ -127,4 +123,3 @@ module.exports.update = async (event) => {
         return handleError(err);
     }
 };
-

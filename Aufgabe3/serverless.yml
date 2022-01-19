@@ -48,9 +48,10 @@ functions:
           path: ${file(./env.yml):UserGetInformation}
           method: get
           authorizer:
-            identitySource: method.request.header.token
+            identitySource: method.request.header.Authorization
             type: token
             name: tokenAuthorizer
+            resultTtlInSeconds: 0
 
   create:
     handler: handler/create.create
@@ -89,9 +90,10 @@ functions:
           path: ${file(./env.yml):UserUpdatePath}
           method: post
           authorizer:
-            identitySource: method.request.header.token
+            identitySource: method.request.header.Authorization
             type: token
             name: tokenAuthorizer
+            resultTtlInSeconds: 0
 
   updatePrio:
     handler: handler/updatePrio.updatePrio
@@ -112,9 +114,10 @@ functions:
           path: ${file(./env.yml):UserUpdatePrioPath}
           method: post
           authorizer:
-            identitySource: method.request.header.token
+            identitySource: method.request.header.Authorization
             type: token
             name: tokenAuthorizer
+            resultTtlInSeconds: 0
 
   delete:
     handler: handler/delete.delete
@@ -134,9 +137,10 @@ functions:
           path: ${file(./env.yml):UserDeletePath}
           method: delete
           authorizer:
-            identitySource: method.request.header.token
+            identitySource: method.request.header.Authorization
             type: token
             name: tokenAuthorizer
+            resultTtlInSeconds: 0
 
   # Login in and out
   login:
@@ -149,6 +153,7 @@ functions:
             identitySource: method.request.header.email, method.request.header.birthday, method.request.header.password
             type: request
             name: loginAuthorizer
+            resultTtlInSeconds: 0
 
   userLogout:
     handler: handler/logout.logout
@@ -168,9 +173,10 @@ functions:
           path: ${file(./env.yml):UserLogoutPath}
           method: get
           authorizer:
-            identitySource: method.request.header.token
+            identitySource: method.request.header.Authorization
             type: token
             name: tokenAuthorizer
+            resultTtlInSeconds: 0
 
   # Admin Functions
   adminLogin:

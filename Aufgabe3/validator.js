@@ -18,7 +18,7 @@ function isPlzValid(plz) {
 }
 
 function isBirthdayValid(birthday) {
-    // this powerfull regex validates a date String with or without - in form YYYY-MM-DD also validates only valid numbers like day only up to 31
+    // this powerful regex validates a date String with or without - in form YYYY-MM-DD also validates only valid numbers like day only up to 31
     const validationRegex =
         /^([0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])$/;
     return birthday && birthday.match(validationRegex)
@@ -40,7 +40,7 @@ function isPreDiseaseValid(pre_disease) {
     return pre_disease !== undefined;
 }
 
-function isValidPassword(password){
+function isValidPassword(password) {
     // Minimum eight characters, at least one letter, one number and one special character from @$!%*#?&§%&|+-_=/*()
     const regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&§%&|+-_=\/*()"']{8,}$/;
     return password !== undefined && password.match(regex);
@@ -108,8 +108,8 @@ function validatePreDisease(pre_disease) {
     }
 }
 
-function validatePassword(password){
-    if (!isValidPassword(password)){
+function validatePassword(password) {
+    if (!isValidPassword(password)) {
         throw errorType.badPassword;
     }
 }
@@ -184,6 +184,20 @@ async function validateItemNotExists(email, birthday) {
     return true;
 }
 
+function validateAttributesNotUndefined(object, ...attributes) {
+    if (object === undefined) {
+        throw errorType.badInput;
+    }
+    if (typeof object !== "object") {
+        throw errorType.badInput;
+    }
+    for (const attribute of attributes) {
+        if (object[attribute] === undefined) {
+            throw errorType.badInput;
+        }
+    }
+}
+
 module.exports = {
     validateEmail,
     validatePlz,
@@ -194,6 +208,7 @@ module.exports = {
     validatePreDisease,
     validatePassword,
     validateName,
+    validateAttributesNotUndefined,
     validateItemExists,
     validateItemNotExists,
     validateItem,
