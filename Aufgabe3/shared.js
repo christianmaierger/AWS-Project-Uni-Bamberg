@@ -136,7 +136,6 @@ function createPriority(birthday, system_relevance, pre_diseases) {
             prio = 2;
         }
     }
-
     return prio;
 }
 

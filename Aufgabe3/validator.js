@@ -33,11 +33,11 @@ function isPrioValid(prio) {
 }
 
 function isSystemRelevanceValid(system_relevance) {
-    return system_relevance !== undefined;
+    return system_relevance !== undefined || typeof system_relevance != "boolean";
 }
 
 function isPreDiseaseValid(pre_disease) {
-    return pre_disease !== undefined;
+    return pre_disease !== undefined || typeof pre_disease != "boolean";
 }
 
 function isValidPassword(password) {
@@ -114,19 +114,11 @@ function validatePassword(password) {
     }
 }
 
-function validateName(name) {
-    if (!name || name === {}) {
-        throw errorType.badName;
-    }
-
-    const regex = /^([a-zA-Z]+\s)*[a-zA-Z]+$/;
-    const surname = name.surname;
-    const lastname = name.lastname;
-
+function validateName(surname, lastname) {
     if (!surname || !lastname) {
         throw errorType.badName;
     }
-
+    const regex = /^([a-zA-Z]+([\s\-])?)*[a-zA-Z]+$/;
     if (!surname.match(regex) || !lastname.match(regex)) {
         throw errorType.badName;
     }

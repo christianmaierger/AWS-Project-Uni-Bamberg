@@ -52,6 +52,12 @@ async function createItem(item) {
     // todo, könnte man doch direkt mit der Funktion machen?
     validateItem(item)
 
+    //todo validieren ob pre-disease und system relevance vorhanden sind?
+    if (!item.system_relevance || !item.pre_diseases) {
+        throw errorType.notAllNecessaryInformation;
+    }
+
+
     if (item.token !== undefined) {
         delete item.token;
     }

@@ -15,6 +15,10 @@ async function updatePriority(item) {
     updateItemBundle.birthday = item.birthday;
     updateItemBundle.prio = createPriority(item.birthday, item.system_relevance, item.pre_diseases);
 
+    if (updateItemBundle.prio==item.prio) {
+        return { code: 200, message: "Priority for user not updated - No Change necessary."}
+    }
+
     const params = wrapUpdateParams(updateItemBundle);
     try {
         await docClient.update(params).promise();
@@ -22,14 +26,15 @@ async function updatePriority(item) {
         console.log(error);
         throw errorType.dberror;
     }
+    return { code: 200, message: "Priority for user updated successfully."}
 }
 
 module.exports.updatePrio = async (event) => {
-    console.log(event);
     try {
         const item = JSON.parse(event.requestContext.authorizer.item);
-        await updatePriority(item);
-        return wrapResponse(200, {message: "Priority for user updated successfully."});
+        let res = await updatePriority(item);
+
+        return wrapResponse(res.code, {message: res.message});
     } catch (err) {
         console.log(err);
         return handleError(err);
