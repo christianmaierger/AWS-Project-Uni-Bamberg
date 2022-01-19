@@ -1,14 +1,14 @@
-const {wrapResponse} = require("../../shared");
+const {wrapResponse, handleError} = require("../../shared");
 const AWS = require("aws-sdk");
+const {validateAttributesNotUndefined} = require("../../validator");
 const cognito = new AWS.CognitoIdentityServiceProvider();
 
 
 module.exports.register = async (event) => {
     try {
-        //const isValid = validateInput(event.body);
-        //if (!isValid) return wrapResponse(400, { message: "Invalid input" });
-
-        const {email, password} = JSON.parse(event.body);
+        const item = JSON.parse(event.body).item;
+        validateAttributesNotUndefined(item, "email", "password");
+        const {email, password} = item;
         const {user_pool_id} = process.env;
         const params = {
             UserPoolId: user_pool_id,
@@ -36,9 +36,8 @@ module.exports.register = async (event) => {
             };
             await cognito.adminSetUserPassword(paramsForSetPass).promise();
         }
-        return wrapResponse(200, {message: "User registration successful"});
+        return wrapResponse(200, {message: "User registration successful."});
     } catch (error) {
-        const message = error.message ? error.message : "Internal server error";
-        return wrapResponse(500, {message});
+        return handleError(error);
     }
 };

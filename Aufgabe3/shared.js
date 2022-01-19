@@ -160,6 +160,7 @@ const errorType = {
     badPreDiseases: "badPreDiseases",
     badSystemRelevance: "badSystemRelevance",
     notAllNecessaryInformation: "notAllNecessaryInformation",
+    badInput: "badInput"
 };
 
 function handleError(err) {
@@ -204,6 +205,12 @@ function handleError(err) {
             return wrapResponse(400, {
                 message:
                     "Name is not formatted correctly.",
+            });
+
+        case errorType.badInput:
+            return wrapResponse(400, {
+                message:
+                    "Input is not formatted correctly.",
             });
 
         case errorType.badSystemRelevance:
