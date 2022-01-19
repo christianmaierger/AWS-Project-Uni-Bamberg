@@ -74,7 +74,7 @@ module.exports.update = async (event) => {
         const itemChanges = JSON.parse(event.body).item;
 
         await updateItem(itemChanges, item);
-        return wrapResponse(200, {message: 'Entry updated successfully'});
+        return wrapResponse(200, {message: 'Entry updated successfully.'});
     } catch (err) {
         return handleError(err);
     }

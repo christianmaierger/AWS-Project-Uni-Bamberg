@@ -6,10 +6,10 @@ const {
     wrapResponse,
     handleError,
     errorType,
-     wrapUpdateParams, createPriority,
+    wrapUpdateParams, createPriority,
 } = require("../shared");
 
-async function updatePrio(item) {
+async function updatePriority(item) {
     const updateItemBundle = {};
     updateItemBundle.email = item.email;
     updateItemBundle.birthday = item.birthday;
@@ -28,8 +28,8 @@ module.exports.updatePrio = async (event) => {
     console.log(event);
     try {
         const item = JSON.parse(event.requestContext.authorizer.item);
-        await updatePrio(item);
-        return wrapResponse(200, {message: "Prio for user updated successfully"});
+        await updatePriority(item);
+        return wrapResponse(200, {message: "Priority for user updated successfully."});
     } catch (err) {
         console.log(err);
         return handleError(err);

@@ -48,7 +48,7 @@ functions:
           path: ${file(./env.yml):UserGetInformation}
           method: get
           authorizer:
-            identitySource: method.request.header.token
+            identitySource: method.request.header.Authorization
             type: token
             name: tokenAuthorizer
 
@@ -89,7 +89,7 @@ functions:
           path: ${file(./env.yml):UserUpdatePath}
           method: post
           authorizer:
-            identitySource: method.request.header.token
+            identitySource: method.request.header.Authorization
             type: token
             name: tokenAuthorizer
 
@@ -112,7 +112,7 @@ functions:
           path: ${file(./env.yml):UserUpdatePrioPath}
           method: post
           authorizer:
-            identitySource: method.request.header.token
+            identitySource: method.request.header.Authorization
             type: token
             name: tokenAuthorizer
 
@@ -134,7 +134,7 @@ functions:
           path: ${file(./env.yml):UserDeletePath}
           method: delete
           authorizer:
-            identitySource: method.request.header.token
+            identitySource: method.request.header.Authorization
             type: token
             name: tokenAuthorizer
 
@@ -168,7 +168,7 @@ functions:
           path: ${file(./env.yml):UserLogoutPath}
           method: get
           authorizer:
-            identitySource: method.request.header.token
+            identitySource: method.request.header.Authorization
             type: token
             name: tokenAuthorizer
 
