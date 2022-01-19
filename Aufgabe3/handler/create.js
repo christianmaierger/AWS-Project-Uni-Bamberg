@@ -7,7 +7,9 @@ const {
     wrapParams,
     handleError,
     errorType,
-    hashPassword, createPriority,
+    hashPassword,
+    createPriority,
+    checkAndFormatName
 } = require('../shared');
 
 // Load the AWS SDK for Node.js
@@ -40,6 +42,7 @@ async function putItemToDatabase(item) {
     }
 }
 
+
 async function createItem(item) {
     /*  validateEmail(item.email);
       validatePlz(item.plz);
@@ -49,14 +52,17 @@ async function createItem(item) {
       validatePreDisease(item.pre_diseases)
       validateSystemRelevance(item.system_relevance);
       validatePassword(item.password);*/
+
+    //todo if name is object change it to new format
+    checkAndFormatName(item);
+
     // todo, könnte man doch direkt mit der Funktion machen?
     validateItem(item)
 
     //todo validieren ob pre-disease und system relevance vorhanden sind?
-    if (!item.system_relevance || !item.pre_diseases) {
+    if (item.system_relevance == undefined || item.pre_diseases == undefined) {
         throw errorType.notAllNecessaryInformation;
     }
-
 
     if (item.token !== undefined) {
         delete item.token;

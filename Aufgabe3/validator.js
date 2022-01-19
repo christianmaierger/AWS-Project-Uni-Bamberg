@@ -114,12 +114,12 @@ function validatePassword(password) {
     }
 }
 
-function validateName(surname, lastname) {
-    if (!surname || !lastname) {
+function validateName(name) {
+    if (!name) {
         throw errorType.badName;
     }
     const regex = /^([a-zA-Z]+([\s\-])?)*[a-zA-Z]+$/;
-    if (!surname.match(regex) || !lastname.match(regex)) {
+    if (!name.match(regex)) {
         throw errorType.badName;
     }
 }
@@ -140,7 +140,10 @@ function validateItem(item) {
             case "plz":
                 validatePlz(element);
                 break;
-            case "name":
+            case "surname":
+                validateName(element);
+                break;
+            case "lastname":
                 validateName(element);
                 break;
             case "gender":

@@ -6,7 +6,7 @@ const {
     wrapResponse,
     handleError,
     errorType,
-    wrapUpdateParams, hashPassword, createPriority,
+    wrapUpdateParams, hashPassword, createPriority, checkAndFormatName,
 } = require('../shared');
 
 const {
@@ -38,6 +38,16 @@ async function updateItem(itemChanges, item) {
     console.log(itemChanges)
     console.log(item)
 
+    const updateItemBundle = {};
+    // format changes if old name format is given
+    checkAndFormatName(itemChanges)
+    // new format for itemUpdateBundle if item is in old format
+    if(item.name && !itemChanges.lastname && !itemChanges.surname) {
+        checkAndFormatName(item)
+        updateItemBundle.surname = item.surname
+        updateItemBundle.lastname = item.lastname
+    }
+
      let noChanges=true;
      for (const key in itemChanges) {
         const value = itemChanges[key];
@@ -46,13 +56,12 @@ async function updateItem(itemChanges, item) {
         }
     }
 
-    const updateItemBundle = {};
+
     updateItemBundle.email = item.email;
     updateItemBundle.birthday = item.birthday;
 
     // validation würde ich vorziehen, können ja aufhören, wenn Unsinn in der Änderung ist? und pw würde ich da mit machen
     // der Konsistenz wegen
-
     await validateItem(itemChanges);
 
     delete itemChanges.email;

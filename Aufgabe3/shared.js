@@ -247,6 +247,14 @@ function handleError(err) {
     }
 }
 
+function checkAndFormatName(item) {
+    if (item.name) {
+        item.surname = item.name.surname;
+        item.lastname = item.name.lastname;
+        delete item.name
+    }
+}
+
 // get our reference to table from environment variables
 const TableName = process.env.Table_Name;
 const GetFunction = process.env.Get_Function;
@@ -270,5 +278,6 @@ module.exports = {
     errorType,
     isAlreadyExisting,
     createPriority,
-    hashPassword
+    hashPassword,
+    checkAndFormatName
 };

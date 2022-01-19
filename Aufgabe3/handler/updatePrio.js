@@ -6,7 +6,7 @@ const {
     wrapResponse,
     handleError,
     errorType,
-    wrapUpdateParams, createPriority,
+    wrapUpdateParams, createPriority, checkAndFormatName,
 } = require("../shared");
 
 async function updatePriority(item) {
@@ -15,6 +15,11 @@ async function updatePriority(item) {
     updateItemBundle.birthday = item.birthday;
     updateItemBundle.prio = createPriority(item.birthday, item.system_relevance, item.pre_diseases);
 
+    if(item.name) {
+        checkAndFormatName(item)
+        updateItemBundle.surname = item.surname
+        updateItemBundle.lastname = item.lastname
+    }
     if (updateItemBundle.prio==item.prio) {
         return { code: 200, message: "Priority for user not updated - No Change necessary."}
     }
