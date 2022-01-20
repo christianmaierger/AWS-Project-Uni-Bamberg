@@ -7,7 +7,7 @@ const {
     wrapResponse,
     errorType,
     handleError,
-    AppointmentTableName, lambda
+    AppointmentTableName, lambda, AssignVaccinationSlotsFunction, wrapParams
 } = require('../../shared');
 
 const {isVaccinationDateValid, validateVaccinationDate} = require('../../validator');
@@ -35,48 +35,52 @@ async function getAvailable() {
         throw errorType.dberror;
     }
 
+    console.log(response);
+
     return response.Items;
 }
 
 async function assignDatesToPriorityAndGetAvailable() {
-    const availableVaccinationSlots = await getAvailable();
+    const slots = await getAvailable();
+    console.log(slots);
 
-    for (const slot of availableVaccinationSlots) {
+    for (const slot of slots) {
+        console.log(slot);
         const plz = slot.plz;
         const date = slot.date;
 
-        if (isVaccinationDateValid(date)) {
+        if (!isVaccinationDateValid(date)) {
+            console.log("Is invalid");
             continue;
         }
 
-        let vaccinationsLeftOver = slot.vaccinationsLeftOver;
+        let vaccinationsLeftOver = slot.availableVaccinationSlots;
+        console.log("VaccinationsLeftOver", vaccinationsLeftOver);
 
-        for (let i = 1; i <= 3; i++) {
-            if (vaccinationsLeftOver === 0) {
-                break;
-            }
+        if (vaccinationsLeftOver === 0) {
+            continue;
+        }
 
-            try {
-                const response = await lambda
-                    .invoke({
-                        FunctionName: "assignVaccinationDates",
-                        InvocationType: "RequestResponse", // is default
-                        Payload: JSON.stringify({
-                            body: {
-                                plz: plz,
-                                date: date,
-                                n: vaccinationsLeftOver
-                            }
+        try {
+            console.log(plz, date, vaccinationsLeftOver);
+            const response = await lambda
+                .invoke({
+                    FunctionName: AssignVaccinationSlotsFunction,
+                    InvocationType: "RequestResponse", // is default
+                    Payload: JSON.stringify({
+                        body: {
+                            plz: plz,
+                            date: date,
+                            n: vaccinationsLeftOver
+                        }
 
-                        }, null, 2), // pass params
-                    })
-                    .promise();
-                console.log(response);
-            } catch (error) {
-                throw errorType.dberror;
-            }
-
-            //vaccinationsLeftOver = (await assignDatesToPriorityAndGetAvailable(i, plz, date, vaccinationsLeftOver)).vaccinationsLeftOver;
+                    }, null, 2), // pass params
+                })
+                .promise();
+            console.log(response);
+        } catch (error) {
+            console.log(error);
+            throw errorType.dberror;
         }
     }
 

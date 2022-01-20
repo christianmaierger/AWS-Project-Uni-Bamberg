@@ -68,6 +68,17 @@ async function putItemToDatabase(item) {
     }
 }
 
+async function deleteItemFromDatabase(item) {
+    const params = wrapParams('Key', item, AppointmentTableName);
+
+    try {
+        await docClient.delete(params).promise();
+    } catch (error) {
+        console.log(error);
+        throw errorType.dberror;
+    }
+}
+
 async function assignDatesToPriorityAndGetAvailable(priority, plz, date, vaccinationsToAssign) {
     const promises = [];
     // https://stackoverflow.com/questions/42229149/how-to-update-multiple-items-in-a-dynamodb-table-at-once
@@ -90,7 +101,7 @@ async function assignDatesToPriorityAndGetAvailable(priority, plz, date, vaccina
         const params = wrapUpdateParams(updateItemBundle);
         promises.push(docClient.update(params).promise());
 
-        sendMail(user, date);
+        await sendMail(user, date).catch(err => console.log("Mail Error:", err));
     }
 
     await Promise.all(promises).catch((err) => {
@@ -101,9 +112,13 @@ async function assignDatesToPriorityAndGetAvailable(priority, plz, date, vaccina
     const vaccinationsAssigned = users.length;
     const vaccinationsLeftOver = vaccinationsToAssign - users.length;
 
-    //TODO!!
-    const item = {date: date, plz: plz, vaccinationsLeftOver: vaccinationsLeftOver};
-    putItemToDatabase(item);
+    if (vaccinationsLeftOver === 0) {
+        const item = {date: date, plz: plz};
+        await deleteItemFromDatabase(item);
+    } else {
+        const item = {date: date, plz: plz, vaccinationsLeftOver: vaccinationsLeftOver};
+        await putItemToDatabase(item);
+    }
 
     return {
         message: `${users.length} vaccination slots assigned successfully.`,
@@ -115,14 +130,22 @@ async function assignDatesToPriorityAndGetAvailable(priority, plz, date, vaccina
 
 module.exports.assignVaccinationDatesByPlz = async (event) => {
     console.log(event);
-    const body = event.body
-    let {plz, date, n} = body;
+    const body = event.body;
 
-    try {
+    let plz, date, n;
+    if (typeof body === "string") {
         plz = JSON.parse(body).plz;
         date = JSON.parse(body).date;
         n = JSON.parse(body).n;
+    } else {
+        plz = body.plz;
+        date = body.date;
+        n = body.n;
+    }
 
+    console.log(plz, date, n);
+
+    try {
         validatePlz(plz);
         validateVaccinationDate(date);
 
@@ -139,7 +162,7 @@ module.exports.assignVaccinationDatesByPlz = async (event) => {
             vaccinationsLeftOver: vaccinationsLeftOver
         };
         if (isEmpty(response)) {
-            return wrapResponse(404, 'Query did not return any user.');
+            return wrapResponse(404, {message: 'Query did not return any user.'});
         }
         return wrapResponse(200, response);
     } catch (err) {

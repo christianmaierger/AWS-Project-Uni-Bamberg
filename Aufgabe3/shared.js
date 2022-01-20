@@ -258,6 +258,7 @@ function checkAndFormatName(item) {
 const TableName = process.env.Table_Name;
 const AppointmentTableName = process.env.Appointment_Table_Name;
 const GetFunction = process.env.Get_Function;
+const AssignVaccinationSlotsFunction = process.env.Assign_Vaccination_Slots_Function;
 const GSIName = process.env.GSI_Name;
 const TokenIndexName = process.env.Token_Index_Name;
 
@@ -270,6 +271,7 @@ module.exports = {
     wrapParams,
     wrapUpdateParams,
     wrapDeleteParams,
+    AssignVaccinationSlotsFunction,
     TokenIndexName,
     handleError,
     TableName,

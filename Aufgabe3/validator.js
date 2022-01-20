@@ -56,15 +56,7 @@ function isVaccinationDateValid(date) {
     let d = new Date(date)
     d.setHours(0, 0, 0, 0);
 
-    console.log(now)
-    console.log(d)
-    if (d < now) {
-        notInPast = false;
-        console.log("Selected date is in the past");
-    } else {
-        notInPast = true;
-        console.log("Selected date is NOT in the past");
-    }
+    notInPast = d >= now;
     return date && date.match(validationRegex) && notInPast
 }
 

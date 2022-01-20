@@ -14,6 +14,7 @@ provider:
     Partition_Key: ${file(./env.yml):Partition_Key} # email
     Sort_Key: ${file(./env.yml):Sort_Key} # birthday
     Get_Function: ${self:functions.read.name}
+    Assign_Vaccination_Slots_Function: ${self:functions.assignVaccinationDates.name}
     Token_Index_Name: ${file(./env.yml):Token_Index_Name}
     user_pool_id: { Ref: UserPool }
     client_id: { Ref: UserClient }
@@ -266,6 +267,7 @@ functions:
 
   assignVaccinationDates:
     handler: handler/admin/assignVaccinationDatesByPlz.assignVaccinationDatesByPlz
+    name: ${self:service}-${sls:stage}-assignVaccinationDates
     iamRoleStatements:
       - Effect: "Allow"
         Action:
@@ -282,6 +284,11 @@ functions:
           - ses:SendEmail
           - ses:SendRawEmail
         Resource: "*"
+      - Effect: "Allow"
+        Action:
+          - dynamodb:DeleteItem
+        Resource:
+          - "Fn::GetAtt": [ VacAppointmentTable, Arn ]
     events:
       - http:
           path: ${file(./env.yml):AdminAssignVaccinationDates}
@@ -322,6 +329,7 @@ functions:
         Action:
           - lambda:InvokeFunction
         Resource:
+          - "arn:aws:lambda:eu-central-1:062983379312:function:assignVaccinationDates"
           - !GetAtt AssignVaccinationDatesLambdaFunction.Arn
     events:
       - http:
@@ -338,7 +346,7 @@ functions:
               - email
 
 
-## NO AUTHORIZER YET
+  ## NO AUTHORIZER YET
   addVaccinationDates:
     handler: admin/addVaccinationDates.addVaccinationDates
     iamRoleStatements:
@@ -365,7 +373,7 @@ functions:
                 - Arn
             claims:
               - email
-          
+
 
   # Authorizer Functions
   tokenAuthorizer:
@@ -456,7 +464,7 @@ resources: # CloudFormation template syntax from here on.
       Properties:
         TableName: ${file(./env.yml):Appointment_Table_Name}
         AttributeDefinitions:
-          - AttributeName: ${file(./env.yml):Appointment_Partition_Key} 
+          - AttributeName: ${file(./env.yml):Appointment_Partition_Key}
             AttributeType: S
           - AttributeName: ${file(./env.yml):Appointment_Sort_Key}
             AttributeType: S
