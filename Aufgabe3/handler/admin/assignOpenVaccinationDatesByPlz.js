@@ -68,34 +68,17 @@ async function getApproachingAppointments(n) {
 
 }
 
-async function getAvailable(){
-    const params = {
-        TableName: AppointmentTableName,
-        ProjectionExpression: "#yr, title, info.rating",
-        FilterExpression: "#yr between :start_yr and :end_yr",
-        ExpressionAttributeNames: {
-            "#yr": "year",
-        },
-        ExpressionAttributeValues: {
-            ":start_yr": 1950,
-            ":end_yr": 1959
-        }
-    };
-
-
+async function getAvailable(date) {
     let response;
     try {
         response = await docClient
             .query({
-                TableName: TableName,
-                IndexName: GSIName,
-                KeyConditionExpression: 'plz = :plz', // KeyConditionExpression using indexed attributes
+                TableName: AppointmentTableName,
+                KeyConditionExpression: 'date = :date', // KeyConditionExpression using indexed attributes
                 ExpressionAttributeValues: {// <----- ExpressionAttributeValues using indexed attributes
-                    ':plz': plz,
-                    ':prio': priority,
+                    ':date': date,
                 },
                 ScanIndexForward: true, // this determines if sorted ascending or descending by range key
-                FilterExpression: 'prio = :prio AND attribute_not_exists(vaccinationDate)'
             })
             .promise();
     } catch (error) {
@@ -105,9 +88,18 @@ async function getAvailable(){
         }
         throw errorType.dberror;
     }
+
+    return response.Items;
 }
 
-async function assignDatesToPriorityAndGetAvailable(priority, plz, date, vaccinationsToAssign) {
+async function assignDatesToPriorityAndGetAvailable(date) {
+    const availableVaccinationSlots = await getAvailable(date);
+
+    for (const slot of availableVaccinationSlots){
+        const plz = slot.plz;
+        const slotCount = slot.count;
+    }
+
     const promises = [];
     // https://stackoverflow.com/questions/42229149/how-to-update-multiple-items-in-a-dynamodb-table-at-once
     const users = await getUsersByPriority(priority, plz, vaccinationsToAssign);
