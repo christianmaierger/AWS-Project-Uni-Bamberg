@@ -380,6 +380,24 @@ resources: # CloudFormation template syntax from here on.
                 KeyType: "RANGE"
             Projection:
               ProjectionType: "ALL"
+    AppointmentTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${file(./env.yml):Appointment_Table_Name}
+        AttributeDefinitions:
+          - AttributeName: ${file(./env.yml):Appointment_Partition_Key} 
+            AttributeType: S
+          - AttributeName: ${file(./env.yml):Appointment_Sort_Key}
+            AttributeType: S
+        KeySchema:
+          - AttributeName: ${file(./env.yml):Partition_Key}
+            KeyType: HASH
+          - AttributeName: ${file(./env.yml):Sort_Key}
+            KeyType: RANGE
+        StreamSpecification:
+          StreamViewType: NEW_IMAGE
+        BillingMode: PAY_PER_REQUEST
+
 
     UserPool:
       Type: AWS::Cognito::UserPool
@@ -392,7 +410,7 @@ resources: # CloudFormation template syntax from here on.
             Required: true
             Mutable: true
         Policies:
-          PasswordPolicy:
+          PasswordPolicy: 
             MinimumLength: 8
         AutoVerifiedAttributes: [ "email" ]
 
