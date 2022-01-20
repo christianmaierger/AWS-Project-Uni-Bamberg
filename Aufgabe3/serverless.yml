@@ -281,6 +281,23 @@ functions:
           - ses:SendEmail
           - ses:SendRawEmail
         Resource: "*"
+    events:
+      - http:
+          path: ${file(./env.yml):AdminAssignVaccinationDates}
+          method: post
+          authorizer:
+            name: PrivateAuthorizer
+            type: COGNITO_USER_POOLS
+            arn:
+              Fn::GetAtt:
+                - UserPool
+                - Arn
+            claims:
+              - email
+
+  assignOpenVaccinationDates:
+    handler: handler/admin/assignOpenVaccinationDatesByPlz.assignOpenVaccinationDatesByPlz
+    iamRoleStatements:
 
     events:
       - http:
