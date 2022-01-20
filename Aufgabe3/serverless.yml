@@ -1,4 +1,4 @@
-service: task3
+service: max-task3
 
 frameworkVersion: "2"
 
@@ -43,7 +43,7 @@ functions:
         Action:
           - dynamodb:GetItem
         Resource:
-          - "Fn::GetAtt": [ UsersTable, Arn ]
+          - "Fn::GetAtt": [ MaxUsersTable, Arn ]
     events:
       - http:
           path: ${file(./env.yml):UserGetInformation}
@@ -61,7 +61,7 @@ functions:
         Action:
           - dynamodb:PutItem
         Resource:
-          - "Fn::GetAtt": [ UsersTable, Arn ]
+          - "Fn::GetAtt": [ MaxUsersTable, Arn ]
       - Effect: "Allow"
         Action:
           - lambda:InvokeFunction
@@ -80,7 +80,7 @@ functions:
           - dynamodb:PutItem
           - dynamodb:UpdateItem
         Resource:
-          - "Fn::GetAtt": [ UsersTable, Arn ]
+          - "Fn::GetAtt": [ MaxUsersTable, Arn ]
       - Effect: "Allow"
         Action:
           - lambda:InvokeFunction
@@ -104,7 +104,7 @@ functions:
           - dynamodb:PutItem
           - dynamodb:UpdateItem
         Resource:
-          - "Fn::GetAtt": [ UsersTable, Arn ]
+          - "Fn::GetAtt": [ MaxUsersTable, Arn ]
       - Effect: "Allow"
         Action:
           - lambda:InvokeFunction
@@ -127,7 +127,7 @@ functions:
         Action:
           - dynamodb:DeleteItem
         Resource:
-          - "Fn::GetAtt": [ UsersTable, Arn ] # longer way to get the arn JSON like
+          - "Fn::GetAtt": [ MaxUsersTable, Arn ] # longer way to get the arn JSON like
       - Effect: "Allow"
         Action:
           - lambda:InvokeFunction
@@ -164,7 +164,7 @@ functions:
           - dynamodb:DeleteItem
           - dynamodb:UpdateItem
         Resource:
-          - "Fn::GetAtt": [ UsersTable, Arn ] # longer way to get the arn JSON like
+          - "Fn::GetAtt": [ MaxUsersTable, Arn ] # longer way to get the arn JSON like
     events:
       - http:
           path: ${file(./env.yml):UserLogoutPath}
@@ -225,8 +225,8 @@ functions:
           - dynamodb:PutItem
           - dynamodb:UpdateItem
         Resource:
-          - "Fn::GetAtt": [ UsersTable, Arn ]
-          - !Sub '${UsersTable.Arn}/index/${file(./env.yml):Index_Name}'
+          - "Fn::GetAtt": [ MaxUsersTable, Arn ]
+          - !Sub '${MaxUsersTable.Arn}/index/${file(./env.yml):Index_Name}'
     events:
       - http:
           path: ${file(./env.yml):AdminUpdateUsersByPlzPath}
@@ -249,7 +249,7 @@ functions:
           - dynamodb:GetItem
           - dynamodb:Query
         Resource:
-          - !Sub '${UsersTable.Arn}/index/${file(./env.yml):Index_Name}'
+          - !Sub '${MaxUsersTable.Arn}/index/${file(./env.yml):Index_Name}'
     events:
       - http:
           path: ${file(./env.yml):AdminListUsersByPlzPath}
@@ -271,12 +271,12 @@ functions:
         Action:
           - dynamodb:Query
         Resource:
-          - !Sub '${UsersTable.Arn}/index/${file(./env.yml):Index_Name}'
+          - !Sub '${MaxUsersTable.Arn}/index/${file(./env.yml):Index_Name}'
       - Effect: "Allow"
         Action:
           - dynamodb:UpdateItem
         Resource:
-          - "Fn::GetAtt": [ UsersTable, Arn ]
+          - "Fn::GetAtt": [ MaxUsersTable, Arn ]
       - Effect: "Allow"
         Action:
           - ses:SendEmail
@@ -304,12 +304,12 @@ functions:
         Action:
           - dynamodb:Query
         Resource:
-          - !Sub '${UsersTable.Arn}/index/${file(./env.yml):Index_Name}'
+          - !Sub '${MaxUsersTable.Arn}/index/${file(./env.yml):Index_Name}'
       - Effect: "Allow"
         Action:
           - dynamodb:UpdateItem
         Resource:
-          - "Fn::GetAtt": [ UsersTable, Arn ]
+          - "Fn::GetAtt": [ MaxUsersTable, Arn ]
       - Effect: "Allow"
         Action:
           - ses:SendEmail
@@ -347,7 +347,7 @@ functions:
     events:
       - http:
           path: ${file(./env.yml):AdminAddVaccinationDates}
-          method: post
+          method: get
           
 
   # Authorizer Functions
@@ -361,8 +361,8 @@ functions:
           - dynamodb:PutItem
           - dynamodb:UpdateItem
         Resource:
-          - "Fn::GetAtt": [ UsersTable, Arn ]
-          - !Sub "${UsersTable.Arn}/index/${file(./env.yml):Token_Index_Name}"
+          - "Fn::GetAtt": [ MaxUsersTable, Arn ]
+          - !Sub "${MaxUsersTable.Arn}/index/${file(./env.yml):Token_Index_Name}"
 
   loginAuthorizer:
     handler: authorizer/loginAuthorizer.authorizer
@@ -373,7 +373,7 @@ functions:
           - dynamodb:PutItem
           - dynamodb:UpdateItem
         Resource:
-          - "Fn::GetAtt": [ UsersTable, Arn ]
+          - "Fn::GetAtt": [ MaxUsersTable, Arn ]
 
   # Additional Functions
   logItemChanges:
@@ -382,7 +382,7 @@ functions:
       - stream:
           type: dynamodb
           arn:
-            Fn::GetAtt: [ UsersTable, StreamArn ]
+            Fn::GetAtt: [ MaxUsersTable, StreamArn ]
     iamRoleStatements:
       - Effect: "Allow"
         Action:
@@ -391,11 +391,11 @@ functions:
           - dynamodb:GetShardIterator
           - dynamodb:ListStreams
         Resource:
-          - "Fn::GetAtt": [ UsersTable, Arn ]
+          - "Fn::GetAtt": [ MaxUsersTable, Arn ]
 
 resources: # CloudFormation template syntax from here on.
   Resources:
-    UsersTable: #must be same as TableName
+    MaxUsersTable: #must be same as TableName
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: ${file(./env.yml):Users_Table_Name}
@@ -433,7 +433,7 @@ resources: # CloudFormation template syntax from here on.
                 KeyType: "RANGE"
             Projection:
               ProjectionType: "ALL"
-              UsersTable: #must be same as TableName
+
     AppointmentTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -455,7 +455,7 @@ resources: # CloudFormation template syntax from here on.
     UserPool:
       Type: AWS::Cognito::UserPool
       Properties:
-        UserPoolName: AdminUserPool
+        UserPoolName: MaxUserPool
         UsernameAttributes:
           - email
         Schema:
