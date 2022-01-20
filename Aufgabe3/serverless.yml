@@ -1,4 +1,4 @@
-service: task3
+service: max-task3
 
 frameworkVersion: "2"
 
@@ -8,6 +8,7 @@ provider:
   lambdaHashingVersion: 20201221
   region: eu-central-1
   environment:
+    Appointment_Table_Name: ${file(./env.yml):Appointment_Table_Name}
     Table_Name: ${file(./env.yml):Users_Table_Name}
     GSI_Name: ${file(./env.yml):Index_Name}
     Partition_Key: ${file(./env.yml):Partition_Key} # email
@@ -42,7 +43,7 @@ functions:
         Action:
           - dynamodb:GetItem
         Resource:
-          - "Fn::GetAtt": [ UsersTable, Arn ]
+          - "Fn::GetAtt": [ MaxUsersTable, Arn ]
     events:
       - http:
           path: ${file(./env.yml):UserGetInformation}
@@ -60,7 +61,7 @@ functions:
         Action:
           - dynamodb:PutItem
         Resource:
-          - "Fn::GetAtt": [ UsersTable, Arn ]
+          - "Fn::GetAtt": [ MaxUsersTable, Arn ]
       - Effect: "Allow"
         Action:
           - lambda:InvokeFunction
@@ -79,7 +80,7 @@ functions:
           - dynamodb:PutItem
           - dynamodb:UpdateItem
         Resource:
-          - "Fn::GetAtt": [ UsersTable, Arn ]
+          - "Fn::GetAtt": [ MaxUsersTable, Arn ]
       - Effect: "Allow"
         Action:
           - lambda:InvokeFunction
@@ -103,7 +104,7 @@ functions:
           - dynamodb:PutItem
           - dynamodb:UpdateItem
         Resource:
-          - "Fn::GetAtt": [ UsersTable, Arn ]
+          - "Fn::GetAtt": [ MaxUsersTable, Arn ]
       - Effect: "Allow"
         Action:
           - lambda:InvokeFunction
@@ -126,7 +127,7 @@ functions:
         Action:
           - dynamodb:DeleteItem
         Resource:
-          - "Fn::GetAtt": [ UsersTable, Arn ] # longer way to get the arn JSON like
+          - "Fn::GetAtt": [ MaxUsersTable, Arn ] # longer way to get the arn JSON like
       - Effect: "Allow"
         Action:
           - lambda:InvokeFunction
@@ -163,7 +164,7 @@ functions:
           - dynamodb:DeleteItem
           - dynamodb:UpdateItem
         Resource:
-          - "Fn::GetAtt": [ UsersTable, Arn ] # longer way to get the arn JSON like
+          - "Fn::GetAtt": [ MaxUsersTable, Arn ] # longer way to get the arn JSON like
     events:
       - http:
           path: ${file(./env.yml):UserLogoutPath}
@@ -224,8 +225,8 @@ functions:
           - dynamodb:PutItem
           - dynamodb:UpdateItem
         Resource:
-          - "Fn::GetAtt": [ UsersTable, Arn ]
-          - !Sub '${UsersTable.Arn}/index/${file(./env.yml):Index_Name}'
+          - "Fn::GetAtt": [ MaxUsersTable, Arn ]
+          - !Sub '${MaxUsersTable.Arn}/index/${file(./env.yml):Index_Name}'
     events:
       - http:
           path: ${file(./env.yml):AdminUpdateUsersByPlzPath}
@@ -248,7 +249,7 @@ functions:
           - dynamodb:GetItem
           - dynamodb:Query
         Resource:
-          - !Sub '${UsersTable.Arn}/index/${file(./env.yml):Index_Name}'
+          - !Sub '${MaxUsersTable.Arn}/index/${file(./env.yml):Index_Name}'
     events:
       - http:
           path: ${file(./env.yml):AdminListUsersByPlzPath}
@@ -270,18 +271,17 @@ functions:
         Action:
           - dynamodb:Query
         Resource:
-          - !Sub '${UsersTable.Arn}/index/${file(./env.yml):Index_Name}'
+          - !Sub '${MaxUsersTable.Arn}/index/${file(./env.yml):Index_Name}'
       - Effect: "Allow"
         Action:
           - dynamodb:UpdateItem
         Resource:
-          - "Fn::GetAtt": [ UsersTable, Arn ]
+          - "Fn::GetAtt": [ MaxUsersTable, Arn ]
       - Effect: "Allow"
         Action:
           - ses:SendEmail
           - ses:SendRawEmail
         Resource: "*"
-
     events:
       - http:
           path: ${file(./env.yml):AdminAssignVaccinationDates}
@@ -297,6 +297,70 @@ functions:
               - email
 
 
+  assignOpenVaccinationDates:
+    handler: handler/admin/assignOpenVaccinationDatesByPlz.assignOpenVaccinationDatesByPlz
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - dynamodb:Query
+        Resource:
+          - !Sub '${MaxUsersTable.Arn}/index/${file(./env.yml):Index_Name}'
+      - Effect: "Allow"
+        Action:
+          - dynamodb:UpdateItem
+          - dynamodb:GetItem
+        Resource:
+          - "Fn::GetAtt": [ MaxUsersTable, Arn ]
+          - "Fn::GetAtt": [ MaxAppointmentTable, Arn ]
+      - Effect: "Allow"
+        Action:
+          - ses:SendEmail
+          - ses:SendRawEmail
+        Resource: "*"
+    events:
+      - http:
+          path: ${file(./env.yml):AdminAssignOpenVaccinationDates}
+          method: post
+          authorizer:
+            name: PrivateAuthorizer
+            type: COGNITO_USER_POOLS
+            arn:
+              Fn::GetAtt:
+                - UserPool
+                - Arn
+            claims:
+              - email
+
+
+## NO AUTHORIZER YET
+  addVaccinationDates:
+    handler: admin/addVaccinationDates.addVaccinationDates
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - dynamodb:PutItem
+        Resource:
+          - "Fn::GetAtt": [ MaxAppointmentTable, Arn ]
+      - Effect: "Allow"
+        Action:
+          - lambda:InvokeFunction
+        Resource:
+          - !GetAtt ReadLambdaFunction.Arn # shortcut to get arn, yaml syntax
+    events:
+      - http:
+          path: ${file(./env.yml):AdminAddVaccinationDates}
+          method: post
+          authorizer:
+            name: PrivateAuthorizer
+            type: COGNITO_USER_POOLS
+            arn:
+              Fn::GetAtt:
+                - UserPool
+                - Arn
+            claims:
+              - email
+          
+
   # Authorizer Functions
   tokenAuthorizer:
     handler: authorizer/tokenAuthorizer.authorizer
@@ -308,8 +372,8 @@ functions:
           - dynamodb:PutItem
           - dynamodb:UpdateItem
         Resource:
-          - "Fn::GetAtt": [ UsersTable, Arn ]
-          - !Sub "${UsersTable.Arn}/index/${file(./env.yml):Token_Index_Name}"
+          - "Fn::GetAtt": [ MaxUsersTable, Arn ]
+          - !Sub "${MaxUsersTable.Arn}/index/${file(./env.yml):Token_Index_Name}"
 
   loginAuthorizer:
     handler: authorizer/loginAuthorizer.authorizer
@@ -320,7 +384,7 @@ functions:
           - dynamodb:PutItem
           - dynamodb:UpdateItem
         Resource:
-          - "Fn::GetAtt": [ UsersTable, Arn ]
+          - "Fn::GetAtt": [ MaxUsersTable, Arn ]
 
   # Additional Functions
   logItemChanges:
@@ -329,7 +393,7 @@ functions:
       - stream:
           type: dynamodb
           arn:
-            Fn::GetAtt: [ UsersTable, StreamArn ]
+            Fn::GetAtt: [ MaxUsersTable, StreamArn ]
     iamRoleStatements:
       - Effect: "Allow"
         Action:
@@ -338,11 +402,11 @@ functions:
           - dynamodb:GetShardIterator
           - dynamodb:ListStreams
         Resource:
-          - "Fn::GetAtt": [ UsersTable, Arn ]
+          - "Fn::GetAtt": [ MaxUsersTable, Arn ]
 
 resources: # CloudFormation template syntax from here on.
   Resources:
-    UsersTable: #must be same as TableName
+    MaxUsersTable: #must be same as TableName
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: ${file(./env.yml):Users_Table_Name}
@@ -381,10 +445,28 @@ resources: # CloudFormation template syntax from here on.
             Projection:
               ProjectionType: "ALL"
 
+    MaxAppointmentTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${file(./env.yml):Appointment_Table_Name}
+        AttributeDefinitions:
+          - AttributeName: ${file(./env.yml):Appointment_Partition_Key} 
+            AttributeType: S
+          - AttributeName: ${file(./env.yml):Appointment_Sort_Key}
+            AttributeType: S
+        KeySchema:
+          - AttributeName: ${file(./env.yml):Appointment_Partition_Key}
+            KeyType: HASH
+          - AttributeName: ${file(./env.yml):Appointment_Sort_Key}
+            KeyType: RANGE
+        StreamSpecification:
+          StreamViewType: NEW_IMAGE
+        BillingMode: PAY_PER_REQUEST
+
     UserPool:
       Type: AWS::Cognito::UserPool
       Properties:
-        UserPoolName: AdminUserPool
+        UserPoolName: MaxUserPool
         UsernameAttributes:
           - email
         Schema:

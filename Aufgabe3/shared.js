@@ -257,6 +257,7 @@ function checkAndFormatName(item) {
 
 // get our reference to table from environment variables
 const TableName = process.env.Table_Name;
+const AppointmentTableName = process.env.Appointment_Table_Name;
 const GetFunction = process.env.Get_Function;
 const GSIName = process.env.GSI_Name;
 const TokenIndexName = process.env.Token_Index_Name;
@@ -279,5 +280,6 @@ module.exports = {
     isAlreadyExisting,
     createPriority,
     hashPassword,
-    checkAndFormatName
+    checkAndFormatName,
+    AppointmentTableName
 };
