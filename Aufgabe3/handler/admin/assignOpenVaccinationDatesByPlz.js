@@ -11,7 +11,8 @@ const {
     TableName,
     GSIName,
     isEmpty,
-    wrapUpdateParams
+    wrapUpdateParams,
+    AppointmentTableName
 } = require('../../shared');
 
 const {validatePlz, validateVaccinationDate} = require('../../validator');
