@@ -7,18 +7,11 @@ const {
     wrapResponse,
     errorType,
     handleError,
-    AppointmentTableName, lambda, AssignVaccinationSlotsFunction, wrapParams
+    AppointmentTableName, lambda, AssignVaccinationSlotsFunction
 } = require('../../shared');
 
-const {isVaccinationDateValid, validateVaccinationDate} = require('../../validator');
+const {isVaccinationDateValid} = require('../../validator');
 
-
-async function getApproachingAppointments(n) {
-    if (n <= 0) {
-        return [];
-    }
-
-}
 
 async function getAvailable() {
     const params = {
@@ -83,45 +76,6 @@ async function assignDatesToPriorityAndGetAvailable() {
             throw errorType.dberror;
         }
     }
-
-    /*
-    const promises = [];
-    // https://stackoverflow.com/questions/42229149/how-to-update-multiple-items-in-a-dynamodb-table-at-once
-    const users = await getUsersByPriority(priority, plz, vaccinationsToAssign);
-    console.log("Length of users is " + users.length)
-    console.log("Users sind:")
-    console.log(users)
-
-    if (users.length === 0) {
-        return {message: `0 users found.`, vaccinationsAssigned: 0, vaccinationsLeftOver: vaccinationsToAssign};
-    }
-
-    for (const user of users) {
-        console.log("user is " + user)
-        const updateItemBundle = {};
-        updateItemBundle.email = user.email;
-        updateItemBundle.birthday = user.birthday;
-        updateItemBundle.vaccinationDate = date;
-
-        const params = wrapUpdateParams(updateItemBundle);
-        promises.push(docClient.update(params).promise());
-
-        sendMail(user, date);
-    }
-
-    await Promise.all(promises).catch((err) => {
-        console.log(err)
-        throw errorType.dberror;
-    });
-
-    const vaccinationsAssigned = users.length;
-    const vaccinationsLeftOver = vaccinationsToAssign - users.length;
-
-    return {
-        message: `${users.length} vaccination slots assigned successfully.`,
-        vaccinationsAssigned: vaccinationsAssigned,
-        vaccinationsLeftOver: vaccinationsLeftOver
-    };*/
 }
 
 module.exports.assignOpenVaccinationDatesByPlz = async (event) => {

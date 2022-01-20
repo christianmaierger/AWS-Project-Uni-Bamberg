@@ -4,7 +4,6 @@
 // get shared functions and variables
 const {
     docClient,
-    ses,
     wrapResponse,
     errorType,
     handleError,

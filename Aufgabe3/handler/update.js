@@ -42,17 +42,17 @@ async function updateItem(itemChanges, item) {
     // format changes if old name format is given
     checkAndFormatName(itemChanges)
     // new format for itemUpdateBundle if item is in old format
-    if(item.name && !itemChanges.lastname && !itemChanges.surname) {
+    if (item.name && !itemChanges.lastname && !itemChanges.surname) {
         checkAndFormatName(item)
         updateItemBundle.surname = item.surname
         updateItemBundle.lastname = item.lastname
     }
 
-     let noChanges=true;
-     for (const key in itemChanges) {
+    let noChanges = true;
+    for (const key in itemChanges) {
         const value = itemChanges[key];
         if (value != item[key] && (key != "birthday" && key != "password" && key != "email")) {
-                noChanges=false;
+            noChanges = false;
         }
     }
 
@@ -70,7 +70,7 @@ async function updateItem(itemChanges, item) {
 
     // added response to let user know nothing was changed, because only bday/mail/token given or the same attributes
     if (Object.keys(itemChanges).length === 0 || noChanges == true) {
-        return { code: 400, message: 'No changed values given - No update made.'}
+        return {code: 400, message: 'No changed values given - No update made.'}
     }
 
 
@@ -89,7 +89,7 @@ async function updateItem(itemChanges, item) {
     const params = wrapUpdateParams(updateItemBundle);
     try {
         await docClient.update(params).promise();
-        return { code: 200, message: 'Entry updated successfully'}
+        return {code: 200, message: 'Entry updated successfully'}
     } catch (error) {
         throw errorType.dberror;
     }
