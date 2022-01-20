@@ -311,12 +311,17 @@ functions:
           - dynamodb:GetItem
         Resource:
           - "Fn::GetAtt": [ UsersTable, Arn ]
-          - "Fn::GetAtt": [ AppointmentTable, Arn ]
+          - "Fn::GetAtt": [ VacAppointmentTable, Arn ]
       - Effect: "Allow"
         Action:
           - ses:SendEmail
           - ses:SendRawEmail
         Resource: "*"
+      - Effect: "Allow"
+        Action:
+          - lambda:InvokeFunction
+        Resource:
+          - !GetAtt AssignVaccinationDatesLambdaFunction.Arn
     events:
       - http:
           path: ${file(./env.yml):AdminAssignOpenVaccinationDates}
@@ -340,7 +345,7 @@ functions:
         Action:
           - dynamodb:PutItem
         Resource:
-          - "Fn::GetAtt": [ AppointmentTable, Arn ]
+          - "Fn::GetAtt": [ VacAppointmentTable, Arn ]
       - Effect: "Allow"
         Action:
           - lambda:InvokeFunction
@@ -445,7 +450,7 @@ resources: # CloudFormation template syntax from here on.
             Projection:
               ProjectionType: "ALL"
 
-    AppointmentTable:
+    VacAppointmentTable:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: ${file(./env.yml):Appointment_Table_Name}

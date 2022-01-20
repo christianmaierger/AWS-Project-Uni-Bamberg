@@ -12,7 +12,7 @@ const {
     GSIName,
     isEmpty,
     wrapUpdateParams,
-    AppointmentTableName
+    AppointmentTableName, lambda
 } = require('../../shared');
 
 const {validatePlz, validateVaccinationDate} = require('../../validator');
@@ -95,9 +95,38 @@ async function getAvailable(date) {
 async function assignDatesToPriorityAndGetAvailable(date) {
     const availableVaccinationSlots = await getAvailable(date);
 
-    for (const slot of availableVaccinationSlots){
+    for (const slot of availableVaccinationSlots) {
         const plz = slot.plz;
-        const slotCount = slot.count;
+        let vaccinationsLeftOver = slot.vaccinationsLeftOver;
+
+        for (let i = 1; i <= 3; i++) {
+            if (vaccinationsLeftOver === 0) {
+                break;
+            }
+
+            try {
+                const response = await lambda
+                    .invoke({
+                        FunctionName: "assignVaccinationDates",
+                        InvocationType: "RequestResponse", // is default
+                        Payload: JSON.stringify({
+                            event: {
+                                body: {
+                                    plz: plz,
+                                    date: date,
+                                    n: vaccinationsLeftOver
+                                }
+                            }
+                        }, null, 2), // pass params
+                    })
+                    .promise();
+                console.log(response);
+            } catch (error) {
+                throw errorType.dberror;
+            }
+
+            vaccinationsLeftOver = (await assignDatesToPriorityAndGetAvailable(i, plz, date, vaccinationsLeftOver)).vaccinationsLeftOver;
+        }
     }
 
     const promises = [];
@@ -140,31 +169,24 @@ async function assignDatesToPriorityAndGetAvailable(date) {
 }
 
 module.exports.assignOpenVaccinationDatesByPlz = async (event) => {
-    const body = event.body
-    let {plz, date, n} = body;
+    const body = event.body;
+    let {date} = body;
 
     try {
-        plz = JSON.parse(body).plz;
         date = JSON.parse(body).date;
-        n = JSON.parse(body).n;
 
         validatePlz(plz)
-        validateVaccinationDate(date)
-        let vaccinationsLeftOver = n;
-        for (let i = 1; i <= 3; i++) {
-            if (vaccinationsLeftOver === 0) {
-                break;
-            }
-            vaccinationsLeftOver = (await assignDatesToPriorityAndGetAvailable(i, plz, date, vaccinationsLeftOver)).vaccinationsLeftOver;
-        }
-        const response = {
+        validateVaccinationDate(date);
+        await assignDatesToPriorityAndGetAvailable(date);
+
+        /*const response = {
             message: "Success",
             vaccinationsAssigned: n - vaccinationsLeftOver,
             vaccinationsLeftOver: vaccinationsLeftOver
         };
         if (isEmpty(response)) {
             return wrapResponse(404, {message: 'Query did not return any user.'});
-        }
+        }*/
         return wrapResponse(200, response);
     } catch (err) {
         console.log(err)
