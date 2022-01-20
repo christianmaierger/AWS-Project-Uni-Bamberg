@@ -308,8 +308,10 @@ functions:
       - Effect: "Allow"
         Action:
           - dynamodb:UpdateItem
+          - dynamodb:GetItem
         Resource:
           - "Fn::GetAtt": [ MaxUsersTable, Arn ]
+          - "Fn::GetAtt": [ MaxAppointmentTable, Arn ]
       - Effect: "Allow"
         Action:
           - ses:SendEmail
@@ -338,7 +340,7 @@ functions:
         Action:
           - dynamodb:PutItem
         Resource:
-          - "Fn::GetAtt": [ AppointmentTable, Arn ]
+          - "Fn::GetAtt": [ MaxAppointmentTable, Arn ]
       - Effect: "Allow"
         Action:
           - lambda:InvokeFunction
@@ -434,7 +436,7 @@ resources: # CloudFormation template syntax from here on.
             Projection:
               ProjectionType: "ALL"
 
-    AppointmentTable:
+    MaxAppointmentTable:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: ${file(./env.yml):Appointment_Table_Name}

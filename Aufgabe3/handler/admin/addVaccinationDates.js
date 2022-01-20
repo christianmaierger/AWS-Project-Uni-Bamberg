@@ -7,8 +7,21 @@ const {
     wrapParams,
     handleError,
     errorType,
-    hashPassword, createPriority,
+    hashPassword, 
+    createPriority,
+    AppointmentTableName
 } = require('../shared');
+
+async function putItemToDatabase(item) {
+    const params = wrapParams('Item', item, AppointmentTableName);
+
+    try {
+        await docClient.put(params).promise();
+    } catch (error) {
+        throw errorType.dberror;
+    }
+}
+
 
 
 module.exports.addVaccinationDates = async (event) => {
