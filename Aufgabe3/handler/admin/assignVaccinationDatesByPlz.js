@@ -90,6 +90,16 @@ async function getUsersByPriority(priority, plz, n) {
     return resultList;
 }
 
+async function putItemToDatabase(item) {
+    const params = wrapParams('Item', item, AppointmentTableName);
+
+    try {
+        await docClient.put(params).promise();
+    } catch (error) {
+        throw errorType.dberror;
+    }
+}
+
 async function assignDatesToPriorityAndGetAvailable(priority, plz, date, vaccinationsToAssign) {
     const promises = [];
     // https://stackoverflow.com/questions/42229149/how-to-update-multiple-items-in-a-dynamodb-table-at-once
@@ -127,12 +137,18 @@ async function assignDatesToPriorityAndGetAvailable(priority, plz, date, vaccina
     const vaccinationsAssigned = users.length;
     const vaccinationsLeftOver = vaccinationsToAssign - users.length;
 
+    //TODO!!
+    const item = {date:date, time:"10:00"};
+    putItemToDatabase(item);
+
     return {
         message: `${users.length} vaccination slots assigned successfully.`,
         vaccinationsAssigned: vaccinationsAssigned,
         vaccinationsLeftOver: vaccinationsLeftOver
     };
 }
+
+
 
 module.exports.assignVaccinationDatesByPlz = async (event) => {
     const body = event.body
