@@ -52,12 +52,14 @@ async function getUsers(plz, priority, n) {
 }
 
 module.exports.listUsersByPlz = async (event) => {
-    const {plz, priority, n} = JSON.parse(event.body);
+    console.log(event);
+    const {plz, n} = event.headers;
+    const priority = parseInt(event.headers.priority);
 
     try {
         const response = await getUsers(plz, priority, n);
         if (isEmpty(response)) {
-            return wrapResponse(404, 'Query did not return any user.');
+            return wrapResponse(404, {message: 'Query did not return any user.'});
         }
         return wrapResponse(200, response);
     } catch (err) {

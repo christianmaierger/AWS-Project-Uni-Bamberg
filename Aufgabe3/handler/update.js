@@ -60,9 +60,8 @@ async function updateItem(itemChanges, item) {
     updateItemBundle.email = item.email;
     updateItemBundle.birthday = item.birthday;
 
-    // validation würde ich vorziehen, können ja aufhören, wenn Unsinn in der Änderung ist? und pw würde ich da mit machen
-    // der Konsistenz wegen
-    await validateItem(itemChanges);
+    console.log(updateItemBundle);
+    await validateItem(updateItemBundle);
 
     delete itemChanges.email;
     delete itemChanges.birthday;
@@ -99,6 +98,7 @@ async function updateItem(itemChanges, item) {
 module.exports.update = async (event) => {
     try {
         const item = JSON.parse(event.requestContext.authorizer.item);
+        console.log(item);
 
         let itemChanges;
         if (event.body) {
