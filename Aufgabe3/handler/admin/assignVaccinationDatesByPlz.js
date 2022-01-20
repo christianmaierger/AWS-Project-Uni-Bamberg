@@ -114,6 +114,7 @@ async function assignDatesToPriorityAndGetAvailable(priority, plz, date, vaccina
 
 
 module.exports.assignVaccinationDatesByPlz = async (event) => {
+    console.log(event);
     const body = event.body
     let {plz, date, n} = body;
 

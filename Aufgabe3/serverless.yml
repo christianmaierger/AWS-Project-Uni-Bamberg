@@ -309,6 +309,7 @@ functions:
         Action:
           - dynamodb:UpdateItem
           - dynamodb:GetItem
+          - dynamodb:Scan
         Resource:
           - "Fn::GetAtt": [ UsersTable, Arn ]
           - "Fn::GetAtt": [ VacAppointmentTable, Arn ]

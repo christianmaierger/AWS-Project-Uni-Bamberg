@@ -4,62 +4,14 @@
 // get shared functions and variables
 const {
     docClient,
-    ses,
     wrapResponse,
     errorType,
     handleError,
-    TableName,
-    GSIName,
-    isEmpty,
-    wrapUpdateParams,
     AppointmentTableName, lambda
 } = require('../../shared');
 
-const {validatePlz, validateVaccinationDate} = require('../../validator');
+const {isVaccinationDateValid, validateVaccinationDate} = require('../../validator');
 
-const {
-    sendMail
-} = require("./shared");
-
-
-async function getUsersByPriority(priority, plz, n) {
-
-    if (n <= 0) {
-        return [];
-    }
-
-    let response;
-    try {
-        response = await docClient
-            .query({
-                TableName: TableName,
-                IndexName: GSIName,
-                KeyConditionExpression: 'plz = :plz', // KeyConditionExpression using indexed attributes
-                ExpressionAttributeValues: {// <----- ExpressionAttributeValues using indexed attributes
-                    ':plz': plz,
-                    ':prio': priority,
-                },
-                ScanIndexForward: true, // this determines if sorted ascending or descending by range key
-                FilterExpression: 'prio = :prio AND attribute_not_exists(vaccinationDate)'
-            })
-            .promise();
-    } catch (error) {
-        console.log(error);
-        if (error === errorType.idnotexists) {
-            throw errorType.idnotexists;
-        }
-        throw errorType.dberror;
-    }
-
-    let resultList = response.Items;
-    console.log("Jetzt kommt result list")
-    console.log(resultList);
-    if (resultList.length > n) {
-        return resultList.splice(0, n);
-    }
-
-    return resultList;
-}
 
 async function getApproachingAppointments(n) {
     if (n <= 0) {
@@ -68,19 +20,13 @@ async function getApproachingAppointments(n) {
 
 }
 
-async function getAvailable(date) {
+async function getAvailable() {
+    const params = {
+        TableName: AppointmentTableName
+    }
     let response;
     try {
-        response = await docClient
-            .query({
-                TableName: AppointmentTableName,
-                KeyConditionExpression: 'date = :date', // KeyConditionExpression using indexed attributes
-                ExpressionAttributeValues: {// <----- ExpressionAttributeValues using indexed attributes
-                    ':date': date,
-                },
-                ScanIndexForward: true, // this determines if sorted ascending or descending by range key
-            })
-            .promise();
+        response = await docClient.scan(params).promise();
     } catch (error) {
         console.log(error);
         if (error === errorType.idnotexists) {
@@ -92,11 +38,17 @@ async function getAvailable(date) {
     return response.Items;
 }
 
-async function assignDatesToPriorityAndGetAvailable(date) {
-    const availableVaccinationSlots = await getAvailable(date);
+async function assignDatesToPriorityAndGetAvailable() {
+    const availableVaccinationSlots = await getAvailable();
 
     for (const slot of availableVaccinationSlots) {
         const plz = slot.plz;
+        const date = slot.date;
+
+        if (isVaccinationDateValid(date)) {
+            continue;
+        }
+
         let vaccinationsLeftOver = slot.vaccinationsLeftOver;
 
         for (let i = 1; i <= 3; i++) {
@@ -110,13 +62,12 @@ async function assignDatesToPriorityAndGetAvailable(date) {
                         FunctionName: "assignVaccinationDates",
                         InvocationType: "RequestResponse", // is default
                         Payload: JSON.stringify({
-                            event: {
-                                body: {
-                                    plz: plz,
-                                    date: date,
-                                    n: vaccinationsLeftOver
-                                }
+                            body: {
+                                plz: plz,
+                                date: date,
+                                n: vaccinationsLeftOver
                             }
+
                         }, null, 2), // pass params
                     })
                     .promise();
@@ -125,10 +76,11 @@ async function assignDatesToPriorityAndGetAvailable(date) {
                 throw errorType.dberror;
             }
 
-            vaccinationsLeftOver = (await assignDatesToPriorityAndGetAvailable(i, plz, date, vaccinationsLeftOver)).vaccinationsLeftOver;
+            //vaccinationsLeftOver = (await assignDatesToPriorityAndGetAvailable(i, plz, date, vaccinationsLeftOver)).vaccinationsLeftOver;
         }
     }
 
+    /*
     const promises = [];
     // https://stackoverflow.com/questions/42229149/how-to-update-multiple-items-in-a-dynamodb-table-at-once
     const users = await getUsersByPriority(priority, plz, vaccinationsToAssign);
@@ -165,19 +117,12 @@ async function assignDatesToPriorityAndGetAvailable(date) {
         message: `${users.length} vaccination slots assigned successfully.`,
         vaccinationsAssigned: vaccinationsAssigned,
         vaccinationsLeftOver: vaccinationsLeftOver
-    };
+    };*/
 }
 
 module.exports.assignOpenVaccinationDatesByPlz = async (event) => {
-    const body = event.body;
-    let {date} = body;
-
     try {
-        date = JSON.parse(body).date;
-
-        validatePlz(plz)
-        validateVaccinationDate(date);
-        await assignDatesToPriorityAndGetAvailable(date);
+        await assignDatesToPriorityAndGetAvailable();
 
         /*const response = {
             message: "Success",
@@ -187,6 +132,7 @@ module.exports.assignOpenVaccinationDatesByPlz = async (event) => {
         if (isEmpty(response)) {
             return wrapResponse(404, {message: 'Query did not return any user.'});
         }*/
+        const response = {message: "Hallo"};
         return wrapResponse(200, response);
     } catch (err) {
         console.log(err)

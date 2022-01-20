@@ -207,6 +207,7 @@ module.exports = {
     validateName,
     validateAttributesNotUndefined,
     validateItemExists,
+    isVaccinationDateValid,
     validateItemNotExists,
     validateItem,
     validateVaccinationDate
