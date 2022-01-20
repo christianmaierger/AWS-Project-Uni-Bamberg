@@ -242,7 +242,7 @@ functions:
               - email
 
   listUsersByPlz:
-    handler: handler/listUsersByPlz.listUsersByPlz
+    handler: handler/admin/listUsersByPlz.listUsersByPlz
     iamRoleStatements:
       - Effect: "Allow"
         Action:

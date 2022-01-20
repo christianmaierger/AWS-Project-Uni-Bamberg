@@ -36,6 +36,7 @@ async function getUsers(plz, priority, n) {
             })
             .promise();
     } catch (error) {
+        console.log(error);
         if (error === errorType.idnotexists) {
             throw errorType.idnotexists;
         }
@@ -60,6 +61,7 @@ module.exports.listUsersByPlz = async (event) => {
         }
         return wrapResponse(200, response);
     } catch (err) {
+        console.log(err);
         return handleError(err);
     }
 };
