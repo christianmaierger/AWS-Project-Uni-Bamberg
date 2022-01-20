@@ -102,7 +102,7 @@ async function assignDatesToPriorityAndGetAvailable(priority, plz, date, vaccina
     const vaccinationsLeftOver = vaccinationsToAssign - users.length;
 
     //TODO!!
-    const item = {date: date, time: "10:00"};
+    const item = {date: date, plz: plz};
     putItemToDatabase(item);
 
     return {

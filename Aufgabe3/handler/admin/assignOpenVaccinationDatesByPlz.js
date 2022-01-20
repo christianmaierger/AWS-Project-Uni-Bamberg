@@ -68,6 +68,45 @@ async function getApproachingAppointments(n) {
 
 }
 
+async function getAvailable(){
+    const params = {
+        TableName: AppointmentTableName,
+        ProjectionExpression: "#yr, title, info.rating",
+        FilterExpression: "#yr between :start_yr and :end_yr",
+        ExpressionAttributeNames: {
+            "#yr": "year",
+        },
+        ExpressionAttributeValues: {
+            ":start_yr": 1950,
+            ":end_yr": 1959
+        }
+    };
+
+
+    let response;
+    try {
+        response = await docClient
+            .query({
+                TableName: TableName,
+                IndexName: GSIName,
+                KeyConditionExpression: 'plz = :plz', // KeyConditionExpression using indexed attributes
+                ExpressionAttributeValues: {// <----- ExpressionAttributeValues using indexed attributes
+                    ':plz': plz,
+                    ':prio': priority,
+                },
+                ScanIndexForward: true, // this determines if sorted ascending or descending by range key
+                FilterExpression: 'prio = :prio AND attribute_not_exists(vaccinationDate)'
+            })
+            .promise();
+    } catch (error) {
+        console.log(error);
+        if (error === errorType.idnotexists) {
+            throw errorType.idnotexists;
+        }
+        throw errorType.dberror;
+    }
+}
+
 async function assignDatesToPriorityAndGetAvailable(priority, plz, date, vaccinationsToAssign) {
     const promises = [];
     // https://stackoverflow.com/questions/42229149/how-to-update-multiple-items-in-a-dynamodb-table-at-once
