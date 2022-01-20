@@ -349,7 +349,16 @@ functions:
     events:
       - http:
           path: ${file(./env.yml):AdminAddVaccinationDates}
-          method: get
+          method: post
+          authorizer:
+            name: PrivateAuthorizer
+            type: COGNITO_USER_POOLS
+            arn:
+              Fn::GetAtt:
+                - UserPool
+                - Arn
+            claims:
+              - email
           
 
   # Authorizer Functions
