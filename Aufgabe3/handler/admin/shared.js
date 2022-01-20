@@ -1,16 +1,9 @@
 const {
-    docClient,
     ses,
-    wrapResponse,
-    errorType,
     handleError,
-    TableName,
-    GSIName,
-    isEmpty,
-    wrapUpdateParams
 } = require('../../shared');
 
-async function sendMail (user, date) {
+async function sendMail(user, date) {
     try {
         let adress = user.email
         var params = {
@@ -22,14 +15,15 @@ async function sendMail (user, date) {
                     Html: {
                         Charset: "UTF-8",
                         Data:
-                            "<html><body><h3>Guten Tag " + user.fullname.surname + " " + user.fullname.lastname + "  ,</h3>" +
+                            "<html><body><h3>Guten Tag " + user.surname + " " + user.lastname + "  ,</h3>" +
                             "<p> wir freuen uns Ihnen hiermit einen Termin anbieten zu können am: </p>" +
                             "<div style='color:darkblue'>" + date + "</div> " +
                             "<br> <p>Bleiben Sie gesund und beste Grüße </p> <p>Ihr Impfteam Bayern</p>  " +
-                            "</body></html>" },
+                            "</body></html>"
+                    },
                 },
 
-                Subject: {  Data: "Ihr Impftermim am " + date },
+                Subject: {Data: "Ihr Impftermim am " + date},
             },
             Source: adress,
         };
@@ -38,7 +32,7 @@ async function sendMail (user, date) {
         console.log(err)
         handleError(err)
     }
-};
+}
 
 module.exports = {
     sendMail

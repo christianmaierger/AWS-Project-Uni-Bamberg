@@ -98,9 +98,6 @@ async function assignDatesToPriorityAndGetAvailable(priority, plz, date, vaccina
         throw errorType.dberror;
     });
 
-    // const vaccinationsAssigned = vaccinationsToAssign - users.length;
-    // const vaccinationsLeftOver = vaccinationsToAssign - vaccinationsAssigned;
-
     const vaccinationsAssigned = users.length;
     const vaccinationsLeftOver = vaccinationsToAssign - users.length;
 
