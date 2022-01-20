@@ -1,7 +1,7 @@
 // Load the AWS SDK for Node.js
 const AWS = require("aws-sdk");
 const crypto = require("crypto");
-const ses = new AWS.SES({ region: "eu-central-1" });
+const ses = new AWS.SES({region: "eu-central-1"});
 // Create DynamoDB document client
 const docClient = new AWS.DynamoDB.DocumentClient({apiVersion: "2012-08-10"});
 
@@ -80,7 +80,6 @@ function wrapUpdateParams(item, tableName = TableName) {
     return params;
 }
 
-// TODO doesn't work currently, need update to new version with token etc.
 async function isAlreadyExisting(email, birthday) {
     const item = {item: {email: email, birthday: birthday}};
 

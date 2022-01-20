@@ -44,23 +44,11 @@ async function putItemToDatabase(item) {
 
 
 async function createItem(item) {
-    /*  validateEmail(item.email);
-      validatePlz(item.plz);
-      validateGender(item.gender);
-      validateBirthday(item.birthday);
-      validateName(item.name);
-      validatePreDisease(item.pre_diseases)
-      validateSystemRelevance(item.system_relevance);
-      validatePassword(item.password);*/
-
-    //todo if name is object change it to new format
     checkAndFormatName(item);
 
-    // todo, könnte man doch direkt mit der Funktion machen?
-    validateItem(item)
+    validateItem(item);
 
-    //todo validieren ob pre-disease und system relevance vorhanden sind?
-    if (item.system_relevance == undefined || item.pre_diseases == undefined) {
+    if (item.system_relevance === undefined || item.pre_diseases === undefined) {
         throw errorType.notAllNecessaryInformation;
     }
 

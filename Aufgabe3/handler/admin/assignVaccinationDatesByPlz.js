@@ -17,10 +17,7 @@ const {
 const {validatePlz, validateVaccinationDate} = require('../../validator');
 
 
-
-
-
-async function sendMail (user, date) {
+async function sendMail(user, date) {
     try {
         let adress = user.email
         var params = {
@@ -36,10 +33,11 @@ async function sendMail (user, date) {
                             "<p> wir freuen uns Ihnen hiermit einen Termin anbieten zu können am: </p>" +
                             "<div style='color:darkblue'>" + date + "</div> " +
                             "<br> <p>Bleiben Sie gesund und beste Grüße </p> <p>Ihr Impfteam Bayern</p>  " +
-                            "</body></html>" },
+                            "</body></html>"
+                    },
                 },
 
-                Subject: {  Data: "Ihr Impftermim am " + date },
+                Subject: {Data: "Ihr Impftermim am " + date},
             },
             Source: adress,
         };
@@ -48,7 +46,7 @@ async function sendMail (user, date) {
         console.log(err)
         handleError(err)
     }
-};
+}
 
 async function getUsersByPriority(priority, plz, n) {
 
@@ -58,7 +56,6 @@ async function getUsersByPriority(priority, plz, n) {
 
     let response;
     try {
-        // TODO only people without date should be retrieved
         response = await docClient
             .query({
                 TableName: TableName,
@@ -121,9 +118,8 @@ async function assignDatesToPriorityAndGetAvailable(priority, plz, date, vaccina
 
         const params = wrapUpdateParams(updateItemBundle);
         promises.push(docClient.update(params).promise());
-        // TODO notify users
 
-        sendMail(user, date)
+        sendMail(user, date);
     }
 
     await Promise.all(promises).catch((err) => {
@@ -138,7 +134,7 @@ async function assignDatesToPriorityAndGetAvailable(priority, plz, date, vaccina
     const vaccinationsLeftOver = vaccinationsToAssign - users.length;
 
     //TODO!!
-    const item = {date:date, time:"10:00"};
+    const item = {date: date, time: "10:00"};
     putItemToDatabase(item);
 
     return {
@@ -149,18 +145,16 @@ async function assignDatesToPriorityAndGetAvailable(priority, plz, date, vaccina
 }
 
 
-
 module.exports.assignVaccinationDatesByPlz = async (event) => {
     const body = event.body
     let {plz, date, n} = body;
 
     try {
-        plz =JSON.parse(body).plz
-        date =JSON.parse(body).date
-        n =JSON.parse(body).n
-        // TODO add validation
-        validatePlz(plz)
-        validateVaccinationDate(date)
+        plz = JSON.parse(body).plz;
+        date = JSON.parse(body).date;
+        n = JSON.parse(body).n;
+        validatePlz(plz);
+        validateVaccinationDate(date);
         let vaccinationsLeftOver = n;
         for (let i = 1; i <= 3; i++) {
             if (vaccinationsLeftOver === 0) {

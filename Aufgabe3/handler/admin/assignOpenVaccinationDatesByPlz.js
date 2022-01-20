@@ -30,7 +30,6 @@ async function getUsersByPriority(priority, plz, n) {
 
     let response;
     try {
-        // TODO only people without date should be retrieved
         response = await docClient
             .query({
                 TableName: TableName,
@@ -90,9 +89,8 @@ async function assignDatesToPriorityAndGetAvailable(priority, plz, date, vaccina
 
         const params = wrapUpdateParams(updateItemBundle);
         promises.push(docClient.update(params).promise());
-        // TODO notify users
 
-        sendMail(user, date)
+        sendMail(user, date);
     }
 
     await Promise.all(promises).catch((err) => {
@@ -118,10 +116,10 @@ module.exports.assignOpenVaccinationDatesByPlz = async (event) => {
     let {plz, date, n} = body;
 
     try {
-        plz =JSON.parse(body).plz
-        date =JSON.parse(body).date
-        n =JSON.parse(body).n
-        // TODO add validation
+        plz = JSON.parse(body).plz;
+        date = JSON.parse(body).date;
+        n = JSON.parse(body).n;
+
         validatePlz(plz)
         validateVaccinationDate(date)
         let vaccinationsLeftOver = n;
@@ -137,7 +135,7 @@ module.exports.assignOpenVaccinationDatesByPlz = async (event) => {
             vaccinationsLeftOver: vaccinationsLeftOver
         };
         if (isEmpty(response)) {
-            return wrapResponse(404, 'Query did not return any user.');
+            return wrapResponse(404, {message: 'Query did not return any user.'});
         }
         return wrapResponse(200, response);
     } catch (err) {

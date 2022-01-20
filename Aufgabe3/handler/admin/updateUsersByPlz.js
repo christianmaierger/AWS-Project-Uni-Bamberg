@@ -80,7 +80,7 @@ module.exports.updateUsersByPlz = async (event) => {
     const body = JSON.parse(event.body);
     const {plz, n} = body;
 
-    // TODO add validation
+    validatePlz(plz);
 
     try {
         const response = await updateUsers(plz, n);
