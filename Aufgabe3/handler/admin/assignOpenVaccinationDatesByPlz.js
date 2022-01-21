@@ -82,16 +82,7 @@ module.exports.assignOpenVaccinationDatesByPlz = async (event) => {
     try {
         await assignDatesToPriorityAndGetAvailable();
 
-        /*const response = {
-            message: "Success",
-            vaccinationsAssigned: n - vaccinationsLeftOver,
-            vaccinationsLeftOver: vaccinationsLeftOver
-        };
-        if (isEmpty(response)) {
-            return wrapResponse(404, {message: 'Query did not return any user.'});
-        }*/
-        const response = {message: "Hallo"};
-        return wrapResponse(200, response);
+        return wrapResponse(200, {message: "Open vaccination dates assigned correctly."});
     } catch (err) {
         console.log(err)
         return handleError(err);
